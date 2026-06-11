@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>13.233.231.118</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>CDO needs access to your camera to capture photos for outlet onboarding, compliance verification, and invoice uploads.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CDO needs your location to add GPS coordinates to photos for verification and compliance purposes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CDO needs access to your photo library to select and upload images for outlet onboarding and invoice processing.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Inter-Regular.ttf</string>
+		<string>Inter-Medium.ttf</string>
+		<string>Inter-SemiBold.ttf</string>
+		<string>Inter-Bold.ttf</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>FIREBASE_ENV</key>
+	<string>$(FIREBASE_ENV)</string>
+</dict>
+</plist>

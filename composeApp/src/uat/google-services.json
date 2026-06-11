@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783691910326",
+    "project_id": "siteflow-cdo-uat",
+    "storage_bucket": "siteflow-cdo-uat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783691910326:android:dbccbd8dd6c38ee7a3ea17",
+        "android_client_info": {
+          "package_name": "com.siteflow.cdo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuqw77TAr3wU06N5Bqi2NlCjDD2lBluJ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,93 @@
+[versions]
+agp = "8.13.2"
+kotlin = "2.2.21"
+
+android-compileSdk = "36"
+android-minSdk = "24"
+android-targetSdk = "36"
+
+composeMultiplatform = "1.9.3"
+navigationCompose = "2.9.1"
+
+kotlinx-coroutines = "1.9.0"
+kotlinSerialization = "1.9.0"
+
+ktor = "3.3.3"
+coil3 = "3.3.0"
+koin = "4.1.1"
+
+playServicesLocation = "21.3.0"
+zoomimageCompose = "1.4.0"
+qrcodeKotlin = "4.5.0"
+
+firebaseBom = "33.12.0"
+googleServices = "4.4.2"
+firebaseCrashlyticsPlugin = "3.0.3"
+
+
+[libraries]
+
+# --- Kotlin ---
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+# --- Compose / Android ---
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.2" }
+androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version = "2.9.6" }
+androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version = "2.9.6" }
+
+# --- Navigation ---
+jetbrains-compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+
+# --- Serialization ---
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+
+# --- Ktor ---
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+# --- Koin ---
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+
+# --- Coil ---
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
+coil-mp = { module = "io.coil-kt.coil3:coil", version.ref = "coil3" }
+coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil3" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil3" }
+
+# --- SQLDelight ---
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+zoomimage-compose = { module = "io.github.panpf.zoomimage:zoomimage-compose", version.ref = "zoomimageCompose" }
+zoomimage-skia = { module = "io.github.panpf.zoomimage:zoomimage-skia", version.ref = "zoomimageCompose" }
+
+# --- QR Code ---
+qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcodeKotlin" }
+
+# --- Firebase ---
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+
+[bundles]
+ktor = [
+    "ktor-client-core",
+    "ktor-client-content-negotiation",
+    "ktor-client-auth",
+    "ktor-client-logging",
+    "ktor-serialization-kotlinx-json",
+]
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
