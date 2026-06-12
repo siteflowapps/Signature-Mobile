@@ -2,29 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>API_KEY</key>
-	<string>AIzaSyD5ET6BCrMp8UYHpSE-LT3QhoT57aKYN6c</string>
-	<key>GCM_SENDER_ID</key>
-	<string>18126552888</string>
-	<key>PLIST_VERSION</key>
-	<string>1</string>
-	<key>BUNDLE_ID</key>
-	<string>com.siteflow.signature</string>
-	<key>PROJECT_ID</key>
-	<string>siteflow-cdo</string>
-	<key>STORAGE_BUCKET</key>
-	<string>siteflow-cdo.firebasestorage.app</string>
-	<key>IS_ADS_ENABLED</key>
-	<false></false>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
-	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
-	<key>IS_GCM_ENABLED</key>
-	<true></true>
-	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:18126552888:ios:7d4e0c60511cf00c868bcd</string>
+    <key>API_KEY</key>
+    <string>AIzaSyCsJ2aTGqGVpwJWBo6Uf3i-Rjy9hcXTmSI</string>
+    <key>GCM_SENDER_ID</key>
+    <string>543750323841</string>
+    <key>PLIST_VERSION</key>
+    <string>1</string>
+    <key>BUNDLE_ID</key>
+    <string>com.siteflow.signature</string>
+    <key>PROJECT_ID</key>
+    <string>signature-qa</string>
+    <key>STORAGE_BUCKET</key>
+    <string>signature-qa.firebasestorage.app</string>
+    <key>IS_ADS_ENABLED</key>
+    <false/>
+    <key>IS_ANALYTICS_ENABLED</key>
+    <false/>
+    <key>IS_APPINVITE_ENABLED</key>
+    <true/>
+    <key>IS_GCM_ENABLED</key>
+    <true/>
+    <key>IS_SIGNIN_ENABLED</key>
+    <true/>
+    <key>GOOGLE_APP_ID</key>
+    <string>1:543750323841:ios:cce687640f6d60f4bbd780</string>
 </dict>
 </plist>
