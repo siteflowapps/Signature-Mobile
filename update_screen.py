@@ -1,6 +1,6 @@
 import re
 
-with open("composeApp/src/commonMain/kotlin/com/siteflow/cdo/ase/dashboard/presentation/OutletDetailScreen.kt", "r") as f:
+with open("composeApp/src/commonMain/kotlin/com/siteflow/signature/ase/dashboard/presentation/OutletDetailScreen.kt", "r") as f:
     code = f.read()
 
 # Replace general colors
@@ -393,7 +393,7 @@ fun SkeletonOutletDetail() {
 if "fun SkeletonOutletDetail()" not in code:
     code += skeleton
 
-with open("composeApp/src/commonMain/kotlin/com/siteflow/cdo/ase/dashboard/presentation/OutletDetailScreen.kt", "w") as f:
+with open("composeApp/src/commonMain/kotlin/com/siteflow/signature/ase/dashboard/presentation/OutletDetailScreen.kt", "w") as f:
     f.write(code)
 
 print("Done")

@@ -1,4 +1,4 @@
-rootProject.name = "CDO"
+rootProject.name = "Signature"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

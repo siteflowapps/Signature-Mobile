@@ -12,7 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		C7F001B07A3CAC3289318A29 /* CDO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CDO.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7F001B07A3CAC3289318A29 /* Signature.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Signature.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -58,7 +58,7 @@
 		10E28CF4E1ECD94C54CE33AF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C7F001B07A3CAC3289318A29 /* CDO.app */,
+				C7F001B07A3CAC3289318A29 /* Signature.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -99,7 +99,7 @@
 				FB0003010000000000000002 /* FirebaseAnalytics */,
 			);
 			productName = iosApp;
-			productReference = C7F001B07A3CAC3289318A29 /* CDO.app */;
+			productReference = C7F001B07A3CAC3289318A29 /* Signature.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -251,7 +251,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.19;
-				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.cdo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.signature;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -466,7 +466,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.19;
-				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.cdo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.signature;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -500,7 +500,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.19;
-				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.cdo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.siteflow.signature;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

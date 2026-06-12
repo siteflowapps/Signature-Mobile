@@ -1,4 +1,4 @@
-# CDO Mobile — Analytics Implementation Plan (Revised)
+# Signature Mobile — Analytics Implementation Plan (Revised)
 
 > Source of truth: `analytics_events_global.md`, `analytics_events_ase.md`,
 > `analytics_events_asm.md`, `analytics_events_outlet.md`, `analytics_params.md`,
@@ -17,7 +17,7 @@
 
 ### Step 0 — Firebase Project Registration
 - ✅ Firebase project created in Firebase Console
-- ✅ Android app registered (`com.siteflow.cdo`)
+- ✅ Android app registered (`com.siteflow.signature`)
 - ✅ iOS app registered
 
 ### Step 1 — Configuration Files
@@ -57,7 +57,7 @@ runs, ensuring Firebase is ready before any analytics events can fire. ✅
   - Android: `manifestPlaceholders["firebaseAnalyticsDebugMode"] = "true"` in `build.gradle.kts` debug buildType → `AndroidManifest.xml` `firebase_analytics_debug_mode` meta-data
   - iOS: `UserDefaults.standard.set(true, forKey: "/google/firebase/debug_mode")` inside `#if DEBUG` in `iOSApp.swift` before `FirebaseApp.configure()`
 - [x] For release builds or manual override:
-  - Android: `adb shell setprop debug.firebase.analytics.app com.siteflow.cdo` (must restart app after setting)
+  - Android: `adb shell setprop debug.firebase.analytics.app com.siteflow.signature` (must restart app after setting)
   - iOS: add `-FIRAnalyticsDebugEnabled` to Xcode scheme launch arguments
 - [x] Select the correct device in the DebugView device dropdown — events are invisible until a device is selected
 - [x] Confirmed events appear in DebugView on both emulator and real device
@@ -102,7 +102,7 @@ DISTRIBUTOR_NAME, HAS_UPI, HAS_CHEQUE_PHOTO, KYC_ID_TYPE, HAS_GST,
 PHOTO_TYPE, SLOT_ID, PHOTO_COUNT, TOTAL_REQUIRED
 
 // Compliance
-OUTLET_STATUS, COMPLETION_PERCENT, CDO_STEPS_COMPLETED,
+OUTLET_STATUS, COMPLETION_PERCENT, SIGNATURE_STEPS_COMPLETED,
 COOLER_TYPE, CAPACITY, SIGNAGE_TYPE, COOLER_INSTALLED, SIGNAGE_INSTALLED
 
 // Invoice

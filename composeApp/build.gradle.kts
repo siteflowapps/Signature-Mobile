@@ -96,11 +96,11 @@ kotlin {
 
 
 android {
-    namespace = "com.siteflow.cdo"
+    namespace = "com.siteflow.signature"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.siteflow.cdo"
+        applicationId = "com.siteflow.signature"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 21

@@ -47,7 +47,7 @@ Dependency injection is handled by **Koin**, with each feature module registerin
 
 All shared code lives under:
 ```
-composeApp/src/commonMain/kotlin/com/siteflow/cdo/
+composeApp/src/commonMain/kotlin/com/siteflow/signature/
 ```
 
 ### Feature Modules

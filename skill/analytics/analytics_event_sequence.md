@@ -1,4 +1,4 @@
-# CDO Mobile — Firebase Analytics Event Sequence
+# Signature Mobile — Firebase Analytics Event Sequence
 
 > Reference for validating events in **Firebase DebugView**.
 > Covers every automatic and custom event fired during app launch and the full login flow.
@@ -11,7 +11,7 @@
 > in `iOSApp.swift` inside a `#if DEBUG` block.
 >
 > **Release builds or manual override:**
-> - **Android:** `adb shell setprop debug.firebase.analytics.app com.siteflow.cdo`
+> - **Android:** `adb shell setprop debug.firebase.analytics.app com.siteflow.signature`
 >   (restart the app after setting — the prop is only read at startup)
 > - **iOS:** launch scheme arg `-FIRAnalyticsDebugEnabled` in Xcode scheme
 >

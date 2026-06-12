@@ -18,11 +18,11 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>CDO needs access to your camera to capture photos for outlet onboarding, compliance verification, and invoice uploads.</string>
+	<string>Signature needs access to your camera to capture photos for outlet onboarding, compliance verification, and invoice uploads.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>CDO needs your location to add GPS coordinates to photos for verification and compliance purposes.</string>
+	<string>Signature needs your location to add GPS coordinates to photos for verification and compliance purposes.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CDO needs access to your photo library to select and upload images for outlet onboarding and invoice processing.</string>
+	<string>Signature needs access to your photo library to select and upload images for outlet onboarding and invoice processing.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Regular.ttf</string>

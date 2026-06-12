@@ -41,7 +41,7 @@ private func installCrashHandler() {
 // MARK: - App Entry Point
 
 @main
-struct CDOApp: App {
+struct SignatureApp: App {
 
     // Retained for the lifetime of the process so NSNotificationCenter observers stay alive.
     private let lifecycleTracker: AppLifecycleTracker
