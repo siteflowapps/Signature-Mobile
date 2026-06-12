@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "674778052029",
-    "project_id": "siteflow-cdo-qa",
-    "storage_bucket": "siteflow-cdo-qa.firebasestorage.app"
+    "project_number": "543750323841",
+    "project_id": "signature-qa",
+    "storage_bucket": "signature-qa.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:674778052029:android:c76b8ea278a7304dd48ed4",
+        "mobilesdk_app_id": "1:543750323841:android:b4397314a8f44b09bbd780",
         "android_client_info": {
           "package_name": "com.siteflow.signature"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD1spS5tc-pULeMAsEfISChGReK16vuMyU"
+          "current_key": "AIzaSyClLt04p1pYKzaM4hybykvH7QU1q0SROns"
         }
       ],
       "services": {
