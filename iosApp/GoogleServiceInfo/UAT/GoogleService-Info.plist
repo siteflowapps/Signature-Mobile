@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>API_KEY</key>
-        <string>AIzaSyCsyv8ZCWRHedMXsP0YdU1TvnVRccPcbbE</string>
-        <key>GCM_SENDER_ID</key>
-        <string>783691910326</string>
-        <key>PLIST_VERSION</key>
-        <string>1</string>
-        <key>BUNDLE_ID</key>
-        <string>com.siteflow.signature.uat</string>
-        <key>PROJECT_ID</key>
-        <string>siteflow-cdo-uat</string>
-        <key>STORAGE_BUCKET</key>
-        <string>siteflow-cdo-uat.firebasestorage.app</string>
-        <key>IS_ADS_ENABLED</key>
-        <false></false>
-        <key>IS_ANALYTICS_ENABLED</key>
-        <false></false>
-        <key>IS_APPINVITE_ENABLED</key>
-        <true></true>
-        <key>IS_GCM_ENABLED</key>
-        <true></true>
-        <key>IS_SIGNIN_ENABLED</key>
-        <true></true>
-        <key>GOOGLE_APP_ID</key>
-        <string>1:783691910326:ios:66cac92a6e789a7ca3ea17</string>
-    </dict>
+<dict>
+    <key>API_KEY</key>
+    <string>AIzaSyAsB2jyZwIUY6f1d09fPEj41yvDUUuYySc</string>
+    <key>GCM_SENDER_ID</key>
+    <string>1073100440096</string>
+    <key>PLIST_VERSION</key>
+    <string>1</string>
+    <key>BUNDLE_ID</key>
+    <string>com.siteflow.signature</string>
+    <key>PROJECT_ID</key>
+    <string>signature-uat</string>
+    <key>STORAGE_BUCKET</key>
+    <string>signature-uat.firebasestorage.app</string>
+    <key>IS_ADS_ENABLED</key>
+    <false/>
+    <key>IS_ANALYTICS_ENABLED</key>
+    <false/>
+    <key>IS_APPINVITE_ENABLED</key>
+    <true/>
+    <key>IS_GCM_ENABLED</key>
+    <true/>
+    <key>IS_SIGNIN_ENABLED</key>
+    <true/>
+    <key>GOOGLE_APP_ID</key>
+    <string>1:1073100440096:ios:ab4210c8a2b8b3b3943245</string>
+</dict>
 </plist>
