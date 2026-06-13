@@ -40,7 +40,6 @@ import org.koin.compose.koinInject
 @Composable
 fun CsoHomeScreen(
     onNavigateToOutlets: (filter: String) -> Unit = {},
-    onNavigateToInvoices: (filter: String) -> Unit = {},
     viewModel: CsoHomeViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
@@ -55,7 +54,6 @@ fun CsoHomeScreen(
                 CsoHomeEvent.NavigateToOutletsAll -> onNavigateToOutlets("All")
                 CsoHomeEvent.NavigateToOutletsInProgress -> onNavigateToOutlets("In Progress")
                 CsoHomeEvent.NavigateToOutletsAsmPending -> onNavigateToOutlets("ASM Pending")
-                CsoHomeEvent.NavigateToInvoicesPending -> onNavigateToInvoices("Pending")
             }
         }
     }
@@ -93,8 +91,7 @@ fun CsoHomeScreen(
                 dashboard = dashboard,
                 onTotalOutlets = { viewModel.onAction(CsoHomeAction.TotalOutletsClicked) },
                 onInProgress = { viewModel.onAction(CsoHomeAction.InProgressOutletsClicked) },
-                onAsmPending = { viewModel.onAction(CsoHomeAction.AsmPendingOutletsClicked) },
-                onPendingInvoices = { viewModel.onAction(CsoHomeAction.PendingInvoicesClicked) }
+                onAsmPending = { viewModel.onAction(CsoHomeAction.AsmPendingOutletsClicked) }
             )
 
             Spacer(Modifier.height(24.dp))
@@ -294,8 +291,7 @@ private fun QuickStatsGrid(
     dashboard: DashboardData?,
     onTotalOutlets: () -> Unit,
     onInProgress: () -> Unit,
-    onAsmPending: () -> Unit,
-    onPendingInvoices: () -> Unit
+    onAsmPending: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -335,15 +331,8 @@ private fun QuickStatsGrid(
                 onClick = onAsmPending,
                 modifier = Modifier.weight(1f)
             )
-            StatTile(
-                value = "${dashboard?.submittedInvoices ?: 0}",
-                label = "Pending Invoices",
-                icon = Icons.Filled.Receipt,
-                iconBg = Color(0xFFFEF2F2),
-                iconTint = Color(0xFFDC2626),
-                onClick = onPendingInvoices,
-                modifier = Modifier.weight(1f)
-            )
+            // Right slot intentionally empty — invoices are not part of the CSO role.
+            Spacer(Modifier.weight(1f))
         }
     }
 }

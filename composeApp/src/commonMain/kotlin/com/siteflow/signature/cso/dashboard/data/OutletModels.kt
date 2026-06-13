@@ -274,7 +274,7 @@ data class OutletItem(
                 updatedTime = timeAgo,
                 completedSteps = completedStepsFromStatus(status, AssetStatus.fromBackend(dto.assetStatus)),
                 ownerName = dto.ownerName,
-                contactNumber = dto.phone,
+                contactNumber = dto.phone ?: dto.ownerMobile,
                 whatsAppNumber = dto.ownerWhatsapp ?: "",
                 outletType = dto.outletType,
                 address = dto.address,
@@ -282,7 +282,7 @@ data class OutletItem(
                 city = dto.city ?: "",
                 gpsLocation = if (dto.latitude != null && dto.longitude != null)
                     GpsLocation(dto.latitude, dto.longitude, "") else null,
-                onboardedByAse = dto.createdByAseName ?: "",
+                onboardedByAse = dto.createdByCsoName ?: dto.createdByAseName ?: "",
                 createdAtRaw = dto.createdAt ?: "",
                 updatedAtRaw = dto.updatedAt ?: dto.createdAt ?: "",
                 assetStatus = AssetStatus.fromBackend(dto.assetStatus),

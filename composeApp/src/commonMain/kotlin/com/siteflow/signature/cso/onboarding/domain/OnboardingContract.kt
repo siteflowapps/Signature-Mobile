@@ -59,6 +59,8 @@ sealed interface OnboardingAction {
     data class PayoutTypeSelected(val type: PayoutType) : OnboardingAction
     data class FixedMonthlyVolumeChanged(val value: String) : OnboardingAction
     data class FixedMonthlyAmountChanged(val value: String) : OnboardingAction
+    data class MonthlyRentalAmountChanged(val value: String) : OnboardingAction
+    data class ExpectedSalesPotentialChanged(val value: String) : OnboardingAction
 
     // Step 3 - Photos
     data class PhotoCaptured(val slotId: String, val path: String) : OnboardingAction
@@ -141,6 +143,8 @@ data class OnboardingState(
     val payoutType: PayoutType = PayoutType.DYNAMIC,
     val fixedMonthlyVolume: String = "",   // cases/month (numeric)
     val fixedMonthlyAmount: String = "",   // ₹/month   (numeric)
+    val monthlyRentalAmount: String = "",  // ₹/month rent (numeric) — backend-required
+    val expectedSalesPotential: String = "", // ₹/month expected sales (numeric) — backend-required
 
     // Step 3 — Photos
     val photoSlots: List<PhotoSlot> = defaultPhotoSlots(),

@@ -12,6 +12,10 @@ data class BusinessDetailsRequestDto(
     val slabId: String? = null,
     val distributorId: String,
     val plannedAnnualVolume: Int,
+    /** ₹/month outlet rent — required by backend (@NotNull). */
+    val monthlyRentalAmount: Int,
+    /** ₹/month expected sales — required by backend (@NotNull). */
+    val expectedSalesPotential: Int,
     val stockingCommitment: List<String>,
     val upiId: String? = null,
     val bankAccountNumber: String,

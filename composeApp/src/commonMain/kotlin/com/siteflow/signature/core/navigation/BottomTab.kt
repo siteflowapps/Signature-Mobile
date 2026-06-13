@@ -25,11 +25,6 @@ val CsoBottomTabs = listOf(
         icon = Icons.Outlined.Storefront
     ),
     BottomTab(
-        destination = AppDestination.CsoInvoices,
-        title = "Invoices",
-        icon = Icons.Outlined.Receipt
-    ),
-    BottomTab(
         destination = AppDestination.Profile,
         title = "Profile",
         icon = Icons.Outlined.Person
@@ -38,9 +33,19 @@ val CsoBottomTabs = listOf(
 
 val AseBottomTabs = listOf(
     BottomTab(
-        destination = AppDestination.AseHome,
-        title = "Approvals",
+        destination = AppDestination.CsoHome,
+        title = "Home",
         icon = Icons.Outlined.Home
+    ),
+    BottomTab(
+        destination = AppDestination.CsoDashboard,
+        title = "Outlets",
+        icon = Icons.Outlined.Storefront
+    ),
+    BottomTab(
+        destination = AppDestination.CsoInvoices,
+        title = "Invoices",
+        icon = Icons.Outlined.Receipt
     ),
     BottomTab(
         destination = AppDestination.Profile,

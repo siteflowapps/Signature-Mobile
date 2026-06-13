@@ -359,6 +359,16 @@ class OnboardingViewModel(
                 updateState { it.copy(fixedMonthlyAmount = filtered, error = null) }
             }
 
+            is OnboardingAction.MonthlyRentalAmountChanged -> {
+                val filtered = action.value.filter { it.isDigit() }.take(8)
+                updateState { it.copy(monthlyRentalAmount = filtered, error = null) }
+            }
+
+            is OnboardingAction.ExpectedSalesPotentialChanged -> {
+                val filtered = action.value.filter { it.isDigit() }.take(8)
+                updateState { it.copy(expectedSalesPotential = filtered, error = null) }
+            }
+
             is OnboardingAction.AgreementAccepted -> {
                 if (action.accepted) analytics.track(AnalyticsEvent.ASEEvent.OnboardingAgreementAccepted)
                 updateState { it.copy(agreementAccepted = action.accepted, error = null) }
@@ -425,7 +435,7 @@ class OnboardingViewModel(
                     scope.launch {
                         outletRepository.getOutletById(action.outletId)
                             .onSuccess { outlet ->
-                                updateState { it.copy(contactNumber = outlet.phone) }
+                                updateState { it.copy(contactNumber = outlet.phone ?: outlet.ownerMobile) }
                             }
                     }
                 }

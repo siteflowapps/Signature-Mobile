@@ -1,12 +1,13 @@
 package com.siteflow.signature.core.data.auth
 
 import com.siteflow.signature.getPlatform
+import com.siteflow.signature.core.util.idempotencyKey
+import com.siteflow.signature.core.util.randomUuid
 import io.ktor.client.plugins.api.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
-import kotlin.random.Random
 
 class AuthInterceptor(
     private val tokenStorage: TokenStorage
@@ -21,8 +22,12 @@ class AuthInterceptor(
                     "Bearer $token"
                 )
             }
-            request.headers.append("X-Request-Id", generateRequestId())
+            request.headers.append("X-Request-Id", randomUuid())
             request.headers.append("X-Client-Type", getPlatform().clientType)
+            // Backend requires an Idempotency-Key on every mutating request
+            // (POST/PUT/PATCH/DELETE). Mirror the web client: attach a unique
+            // key per request. Harmless on GETs (the backend ignores it there).
+            request.headers.append("Idempotency-Key", idempotencyKey())
 
             // ── Request Logging ──
             val method = request.method.value
@@ -51,15 +56,4 @@ class AuthInterceptor(
         }
     }
 
-    private fun generateRequestId(): String {
-        val bytes = ByteArray(16).also { Random.nextBytes(it) }
-        bytes[6] = (bytes[6].toInt() and 0x0F or 0x40).toByte() // version 4
-        bytes[8] = (bytes[8].toInt() and 0x3F or 0x80).toByte() // variant
-        return buildString {
-            bytes.forEachIndexed { i, byte ->
-                if (i == 4 || i == 6 || i == 8 || i == 10) append('-')
-                append(byte.toInt().and(0xFF).toString(16).padStart(2, '0'))
-            }
-        }
-    }
 }

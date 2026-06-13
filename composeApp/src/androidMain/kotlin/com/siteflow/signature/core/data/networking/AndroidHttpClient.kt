@@ -20,6 +20,7 @@ class AndroidHttpClient : HttpClientProvider {
                 json(Json {
                     ignoreUnknownKeys = true
                     explicitNulls = false
+                    coerceInputValues = true
                 })
             }
 

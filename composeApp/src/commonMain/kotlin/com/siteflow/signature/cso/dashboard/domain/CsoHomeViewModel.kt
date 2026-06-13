@@ -39,10 +39,6 @@ class CsoHomeViewModel(
                 analytics.track(AnalyticsEvent.ASEEvent.DashboardCardTapped(cardName = "ASM Pending"))
                 emitEvent(CsoHomeEvent.NavigateToOutletsAsmPending)
             }
-            CsoHomeAction.PendingInvoicesClicked -> {
-                analytics.track(AnalyticsEvent.ASEEvent.DashboardCardTapped(cardName = "Pending Invoices"))
-                emitEvent(CsoHomeEvent.NavigateToInvoicesPending)
-            }
         }
     }
 

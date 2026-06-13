@@ -19,6 +19,7 @@ fun mapInvoiceStatus(status: String?): InvoiceStatus {
         "SUBMITTED" -> InvoiceStatus.SUBMITTED
         "ASE_APPROVED" -> InvoiceStatus.ASE_APPROVED
         "ASM_APPROVED" -> InvoiceStatus.ASM_APPROVED
+        "RSM_APPROVED" -> InvoiceStatus.RSM_APPROVED
         "FINANCE_APPROVED" -> InvoiceStatus.FINANCE_APPROVED
         "CALCULATED" -> InvoiceStatus.CALCULATED
         "PAID" -> InvoiceStatus.PAID
@@ -89,7 +90,7 @@ fun InvoiceDto.toOutletRecentInvoice(): OutletRecentInvoice {
         accentColor = when (mappedStatus) {
             InvoiceStatus.APPROVED, InvoiceStatus.FINANCE_APPROVED, InvoiceStatus.PAID -> AppColors.Success
             InvoiceStatus.REJECTED -> AppColors.Danger
-            InvoiceStatus.ASE_APPROVED, InvoiceStatus.ASM_APPROVED -> AppColors.BlueGradientStart
+            InvoiceStatus.ASE_APPROVED, InvoiceStatus.ASM_APPROVED, InvoiceStatus.RSM_APPROVED -> AppColors.BlueGradientStart
             InvoiceStatus.SUBMITTED, InvoiceStatus.PENDING, InvoiceStatus.CALCULATED -> Color(0xFFF59E0B)
         }
     )

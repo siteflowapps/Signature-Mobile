@@ -23,7 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.siteflow.signature.cso.compliance.presentation.ComplianceScreen
-import com.siteflow.signature.ase.approvals.presentation.AseApprovalsHomeScreen
+import com.siteflow.signature.ase.approvals.presentation.AseOutletReviewScreen
 import com.siteflow.signature.cso.dashboard.presentation.CsoHomeScreen
 import com.siteflow.signature.cso.dashboard.presentation.AsmHomeScreen
 import com.siteflow.signature.cso.dashboard.presentation.CsoDashboardScreen
@@ -338,6 +338,11 @@ fun AppNavHost(
                     onBack = { navController.popBackStack() }
                 )
 
+                AppDestination.AseOutletReview.route -> OutletDetailTopAppBar(
+                    title = "Review Outlet",
+                    onBack = { navController.popBackStack() }
+                )
+
                 AppDestination.CsoInvoiceDetail.route -> InvoiceDetailTopAppBar(
                     title = "Invoice Review",
                     onBack = { navController.popBackStack() }
@@ -477,7 +482,7 @@ fun AppNavHost(
                     onVerified = { role ->
                         val dest = when (role) {
                             UserRole.CSO -> AppDestination.CsoHome.route
-                            UserRole.ASE -> AppDestination.AseHome.route
+                            UserRole.ASE -> AppDestination.CsoHome.route
                             UserRole.ASM -> AppDestination.AsmHome.route
                             UserRole.OUTLET -> AppDestination.OutletDashboard.route
                         }
@@ -502,7 +507,7 @@ fun AppNavHost(
                     onRoleSelected = { role: UserRole ->
                         val destination = when (role) {
                             UserRole.CSO -> AppDestination.CsoHome.route
-                            UserRole.ASE -> AppDestination.AseHome.route
+                            UserRole.ASE -> AppDestination.CsoHome.route
                             UserRole.OUTLET -> AppDestination.OutletDashboard.route
                             UserRole.ASM -> AppDestination.AsmHome.route
                         }
@@ -513,7 +518,7 @@ fun AppNavHost(
                 )
             }
 
-            /* ---------------- ASE HOME DASHBOARD ---------------- */
+            /* ---------------- CSO HOME DASHBOARD ---------------- */
             composable(AppDestination.CsoHome.route) {
                 CsoHomeScreen(
                     onNavigateToOutlets = { filter ->
@@ -526,17 +531,6 @@ fun AppNavHost(
                         navController.currentBackStackEntry
                             ?.savedStateHandle?.set("outletFilter", chipFilter)
                         navController.navigate(AppDestination.CsoDashboard.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = false
-                        }
-                    },
-                    onNavigateToInvoices = { filter ->
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle?.set("invoiceFilter", filter)
-                        navController.navigate(AppDestination.CsoInvoices.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -564,7 +558,13 @@ fun AppNavHost(
                             ?.savedStateHandle?.set("outletId", outlet.id)
                         navController.currentBackStackEntry
                             ?.savedStateHandle?.set("outletName", outlet.name)
-                        navController.navigate(AppDestination.CsoOutletDetails.route)
+                        // ASE acts as the L1 approver: open the review/approve
+                        // screen instead of the read-only field detail.
+                        if (currentRole == UserRole.ASE) {
+                            navController.navigate(AppDestination.AseOutletReview.route)
+                        } else {
+                            navController.navigate(AppDestination.CsoOutletDetails.route)
+                        }
                     },
                     onContinueOnboarding = { outletId, step ->
                         onboardingViewModel.onAction(OnboardingAction.ResetState)
@@ -996,8 +996,13 @@ fun AppNavHost(
             }
 
             /* ---------------- ASE (L1 APPROVER) ---------------- */
-            composable(AppDestination.AseHome.route) {
-                AseApprovalsHomeScreen()
+            composable(AppDestination.AseOutletReview.route) {
+                val outletId = navController.previousBackStackEntry
+                    ?.savedStateHandle?.get<String>("outletId") ?: ""
+                AseOutletReviewScreen(
+                    outletId = outletId,
+                    onDone = { navController.popBackStack() }
+                )
             }
 
             /* ---------------- ASM SCREENS ---------------- */

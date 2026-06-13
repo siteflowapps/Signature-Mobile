@@ -94,6 +94,7 @@ private fun InvoiceStatusBadge(status: InvoiceStatus) {
         InvoiceStatus.SUBMITTED, InvoiceStatus.PENDING -> Triple(Color(0xFFFEF3C7), Color(0xFFF59E0B), "Pending")
         InvoiceStatus.ASE_APPROVED -> Triple(Color(0xFFDBEAFE), AppColors.BlueGradientStart, "ASE Approved")
         InvoiceStatus.ASM_APPROVED -> Triple(Color(0xFFDBEAFE), AppColors.BlueGradientStart, "ASM Approved")
+        InvoiceStatus.RSM_APPROVED -> Triple(Color(0xFFEDE9FE), Color(0xFF7C3AED), "RSM Approved")
         InvoiceStatus.FINANCE_APPROVED -> Triple(Color(0xFFD1FAE5), AppColors.Success, "Approved")
         InvoiceStatus.PAID -> Triple(Color(0xFFD1FAE5), AppColors.Success, "Paid")
         InvoiceStatus.APPROVED -> Triple(Color(0xFFD1FAE5), AppColors.Success, "Approved")

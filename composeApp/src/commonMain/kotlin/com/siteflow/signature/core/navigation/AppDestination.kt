@@ -22,7 +22,7 @@ sealed class AppDestination(val route: String) {
     object CsoInvoiceDetail : AppDestination("cso/invoice-detail")
 
     // ASE (Area Sales Executive) — L1 approver
-    object AseHome : AppDestination("ase/home")
+    object AseOutletReview : AppDestination("ase/outlet-review")
 
     // Outlet
     object OutletDashboard : AppDestination("outlet/dashboard")
