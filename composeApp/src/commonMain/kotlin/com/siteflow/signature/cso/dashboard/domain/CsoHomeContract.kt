@@ -4,7 +4,7 @@ import com.siteflow.signature.cso.onboarding.data.dto.SlabDto
 import com.siteflow.signature.outlet.dashboard.data.DashboardData
 
 /**
- * MVI Contract for the ASE Home Dashboard.
+ * MVI Contract for the CSO Home Dashboard.
  */
 
 sealed interface CsoHomeAction {
@@ -12,7 +12,6 @@ sealed interface CsoHomeAction {
     data object TotalOutletsClicked : CsoHomeAction
     data object InProgressOutletsClicked : CsoHomeAction
     data object AsmPendingOutletsClicked : CsoHomeAction
-    data object PendingInvoicesClicked : CsoHomeAction
 }
 
 data class CsoHomeState(
@@ -26,5 +25,4 @@ sealed interface CsoHomeEvent {
     data object NavigateToOutletsAll : CsoHomeEvent
     data object NavigateToOutletsInProgress : CsoHomeEvent
     data object NavigateToOutletsAsmPending : CsoHomeEvent
-    data object NavigateToInvoicesPending : CsoHomeEvent
 }

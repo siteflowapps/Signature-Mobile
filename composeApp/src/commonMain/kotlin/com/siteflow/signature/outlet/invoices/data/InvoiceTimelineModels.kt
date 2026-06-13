@@ -163,6 +163,7 @@ fun buildTimelineFromStatus(invoice: InvoiceItem): List<InvoiceTimelineStep> {
         InvoiceStatus.SUBMITTED,
         InvoiceStatus.ASE_APPROVED,
         InvoiceStatus.ASM_APPROVED,
+        InvoiceStatus.RSM_APPROVED,
         InvoiceStatus.FINANCE_APPROVED,
         InvoiceStatus.CALCULATED,
         InvoiceStatus.PAID

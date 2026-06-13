@@ -4,6 +4,7 @@ import com.siteflow.signature.cso.onboarding.data.dto.AssetRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.BusinessDetailsRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.CreateOutletRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.CreateOutletResponseDto
+import com.siteflow.signature.cso.onboarding.data.dto.OutletDecisionRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.DistributorListResponseDto
 import com.siteflow.signature.cso.onboarding.data.dto.OutletListResponseDto
 import com.siteflow.signature.cso.onboarding.data.dto.SlabsResponseDto
@@ -14,11 +15,13 @@ import com.siteflow.signature.core.data.networking.error.ApiError
 import com.siteflow.signature.core.data.networking.request.safeRequest
 import com.siteflow.signature.core.data.networking.result.NetworkResult
 import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -93,9 +96,8 @@ class OutletApi(
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.submitFormWithBinaryData(
-                    url = NetworkConfig.v1("outlets/$outletId/business-details"),
-                    formData = formData {
+                client.put(NetworkConfig.v1("outlets/$outletId/business-details")) {
+                    setBody(MultiPartFormDataContent(formData {
                         // JSON data part
                         append(
                             "data",
@@ -115,8 +117,8 @@ class OutletApi(
                                 }
                             )
                         }
-                    }
-                )
+                    }))
+                }
             }
         )
     }
@@ -138,9 +140,8 @@ class OutletApi(
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.submitFormWithBinaryData(
-                    url = NetworkConfig.v1("outlets/$outletId/kyc-details"),
-                    formData = formData {
+                client.put(NetworkConfig.v1("outlets/$outletId/kyc-details")) {
+                    setBody(MultiPartFormDataContent(formData {
                         // JSON data part
                         append(
                             "data",
@@ -178,8 +179,8 @@ class OutletApi(
                                 append(HttpHeaders.ContentType, "image/jpeg")
                             }
                         )
-                    }
-                )
+                    }))
+                }
             }
         )
     }
@@ -224,9 +225,8 @@ class OutletApi(
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.submitFormWithBinaryData(
-                    url = NetworkConfig.v1("outlets/$outletId/photos"),
-                    formData = formData {
+                client.put(NetworkConfig.v1("outlets/$outletId/photos")) {
+                    setBody(MultiPartFormDataContent(formData {
                         photoEntries.forEach { (type, bytes) ->
                             append(
                                 type,
@@ -237,14 +237,14 @@ class OutletApi(
                                 }
                             )
                         }
-                    }
-                )
+                    }))
+                }
             }
         )
     }
 
     /**
-     * POST /outlets/{outletId}/request-agreement-otp
+     * POST /outlets/{outletId}/agreement/otp
      * Triggers agreement OTP to be sent to the outlet owner's phone.
      */
     suspend fun requestAgreementOtp(
@@ -252,14 +252,16 @@ class OutletApi(
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.post(NetworkConfig.v1("outlets/$outletId/request-agreement-otp"))
+                client.post(NetworkConfig.v1("outlets/$outletId/agreement/otp"))
             }
         )
     }
 
     /**
-     * POST /outlets/{outletId}/verify-agreement
-     * Verifies the agreement OTP. On success, outlet becomes ASM_PENDING.
+     * POST /outlets/{outletId}/agreement
+     * Verifies the agreement OTP. On success, outlet advances to ASE_PENDING
+     * (L1) — or ASM_PENDING when the chain has no ASE.
+     * Body: { "otp": "..." } (VerifyAgreementRequest).
      */
     suspend fun verifyAgreementOtp(
         outletId: String,
@@ -267,7 +269,7 @@ class OutletApi(
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.post(NetworkConfig.v1("outlets/$outletId/verify-agreement")) {
+                client.post(NetworkConfig.v1("outlets/$outletId/agreement")) {
                     contentType(ContentType.Application.Json)
                     setBody(mapOf("otp" to otp))
                 }
@@ -277,31 +279,23 @@ class OutletApi(
 
     /**
      * POST /outlets/{outletId}/asm-approve
-     * ASM approves the outlet. On success, outlet status becomes ASM_APPROVED.
+     * POST /outlets/{outletId}/decision
+     * Single approval endpoint. The backend resolves the level from the
+     * caller's role + the outlet's status:
+     *  - ASE on ASE_PENDING  → L1 approve/reject
+     *  - ASM on ASM_PENDING  → L2 approve/reject
+     * Body: { "action": "APPROVE" | "REJECT" | "RESUBMIT", "reason": "..." }
      */
-    suspend fun asmApprove(
-        outletId: String
-    ): NetworkResult<CreateOutletResponseDto, ApiError> {
-        return safeRequest<CreateOutletResponseDto>(
-            block = {
-                client.post(NetworkConfig.v1("outlets/$outletId/asm-approve"))
-            }
-        )
-    }
-
-    /**
-     * POST /outlets/{outletId}/asm-reject
-     * ASM rejects the outlet.
-     */
-    suspend fun asmReject(
+    suspend fun decide(
         outletId: String,
-        remarks: String
+        action: String,
+        reason: String? = null
     ): NetworkResult<CreateOutletResponseDto, ApiError> {
         return safeRequest<CreateOutletResponseDto>(
             block = {
-                client.post(NetworkConfig.v1("outlets/$outletId/asm-reject")) {
+                client.post(NetworkConfig.v1("outlets/$outletId/decision")) {
                     contentType(ContentType.Application.Json)
-                    setBody(mapOf("remarks" to remarks))
+                    setBody(OutletDecisionRequestDto(action = action, reason = reason))
                 }
             }
         )

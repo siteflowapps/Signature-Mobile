@@ -110,11 +110,58 @@ fun OnboardingStep2Screen(
 
             Spacer(Modifier.height(20.dp))
 
-            // Suggested Classification Hero
+            // Suggested Classification — only relevant for DYNAMIC (volume-based
+            // slab) payout. For FIXED the payout is set manually, so this is hidden
+            // and slabClassification is defaulted on submit.
+            if (state.payoutType == PayoutType.DYNAMIC) {
+                Text(
+                    text = "Suggested Classification",
+                    style = AppTypography.TitleMedium.copy(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color(0xFF374151)
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                ClassificationHeroCard(
+                    classificationLabel = state.selectedClassification,
+                    slabs = state.slabs
+                )
+
+                Spacer(Modifier.height(20.dp))
+
+                // Classification Slabs (dynamic from API)
+                if (state.isSlabsLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = AppColors.BlueGradientStart
+                        )
+                    }
+                } else if (state.slabs.isNotEmpty()) {
+                    DynamicSlabsList(
+                        slabs = state.slabs,
+                        selectedClassification = state.selectedClassification,
+                        onSlabSelected = { slabId ->
+                            viewModel.onAction(OnboardingAction.SlabSelected(slabId))
+                        }
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+            }
+
+            // ── Outlet Economics ──
             Text(
-                text = "Suggested Classification",
+                text = "Outlet Economics",
                 style = AppTypography.TitleMedium.copy(
-                    fontSize = 15.sp, 
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = Color(0xFF374151)
@@ -122,34 +169,29 @@ fun OnboardingStep2Screen(
 
             Spacer(Modifier.height(12.dp))
 
-            ClassificationHeroCard(
-                classificationLabel = state.selectedClassification,
-                slabs = state.slabs
+            SignatureTextField(
+                value = state.monthlyRentalAmount,
+                onValueChange = { viewModel.onAction(OnboardingAction.MonthlyRentalAmountChanged(it)) },
+                placeholder = "e.g. 15000",
+                label = "Monthly Rental Amount",
+                required = true,
+                prefix = "₹",
+                leadingIconVector = Icons.Default.CurrencyRupee,
+                keyboardType = KeyboardType.Number
             )
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Classification Slabs (dynamic from API)
-            if (state.isSlabsLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = AppColors.BlueGradientStart
-                    )
-                }
-            } else if (state.slabs.isNotEmpty()) {
-                DynamicSlabsList(
-                    slabs = state.slabs,
-                    selectedClassification = state.selectedClassification,
-                    onSlabSelected = { slabId ->
-                        viewModel.onAction(OnboardingAction.SlabSelected(slabId))
-                    }
-                )
-            }
+            SignatureTextField(
+                value = state.expectedSalesPotential,
+                onValueChange = { viewModel.onAction(OnboardingAction.ExpectedSalesPotentialChanged(it)) },
+                placeholder = "e.g. 50000",
+                label = "Expected Sales Potential",
+                required = true,
+                prefix = "₹",
+                leadingIconVector = Icons.Default.TrendingUp,
+                keyboardType = KeyboardType.Number
+            )
 
             Spacer(Modifier.height(24.dp))
         }
@@ -215,20 +257,20 @@ private fun PayoutTypeSelector(
 
         Spacer(Modifier.height(12.dp))
 
-//        // ── Fixed Payout Card ──
-//        PayoutOptionCard(
-//            type = PayoutType.FIXED,
-//            isSelected = selectedType == PayoutType.FIXED,
-//            icon = Icons.Default.AccountBalance,
-//            accentColor = Color(0xFF7C3AED),
-//            accentBg = Color(0xFFF5F3FF),
-//            selectedBorder = Color(0xFFC4B5FD),
-//            selectedBg = Color(0xFFFAF5FF),
-//            tagText = null,
-//            tagBg = Color.Transparent,
-//            tagColor = Color.Transparent,
-//            onClick = { onTypeSelected(PayoutType.FIXED) }
-//        )
+        // ── Fixed Payout Card ──
+        PayoutOptionCard(
+            type = PayoutType.FIXED,
+            isSelected = selectedType == PayoutType.FIXED,
+            icon = Icons.Default.AccountBalance,
+            accentColor = Color(0xFF7C3AED),
+            accentBg = Color(0xFFF5F3FF),
+            selectedBorder = Color(0xFFC4B5FD),
+            selectedBg = Color(0xFFFAF5FF),
+            tagText = null,
+            tagBg = Color.Transparent,
+            tagColor = Color.Transparent,
+            onClick = { onTypeSelected(PayoutType.FIXED) }
+        )
 
         // ── Fixed Payout Input Fields (animated) ──
         AnimatedVisibility(

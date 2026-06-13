@@ -37,7 +37,7 @@ class AppStartViewModel(
                     RoleManager.setRole(role)
                     val dest = when (role) {
                         UserRole.CSO -> AppDestination.CsoHome.route
-                        UserRole.ASE -> AppDestination.AseHome.route
+                        UserRole.ASE -> AppDestination.CsoHome.route
                         UserRole.ASM -> AppDestination.AsmHome.route
                         UserRole.OUTLET -> {
                             // Sync walkthrough flags from config API

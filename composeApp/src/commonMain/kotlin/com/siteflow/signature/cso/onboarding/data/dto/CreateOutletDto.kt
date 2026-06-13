@@ -37,7 +37,7 @@ data class CreateOutletResponseDto(
 data class OutletResponseData(
     val id: String,
     val name: String,
-    val phone: String,
+    val phone: String? = null,
     val ownerName: String,
     val ownerMobile: String,
     val ownerWhatsapp: String? = null,
@@ -67,6 +67,8 @@ data class OutletResponseData(
     val dmsId: String? = null,
     val createdByAseId: String? = null,
     val createdByAseName: String? = null,
+    val createdByCsoId: String? = null,
+    val createdByCsoName: String? = null,
     val onboardedAt: String? = null,
     val activatedAt: String? = null,
     val createdAt: String? = null,

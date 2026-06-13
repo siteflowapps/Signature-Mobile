@@ -3,6 +3,8 @@ package com.siteflow.signature.core.data.auth
 import com.siteflow.signature.core.data.networking.client.HttpClientProvider
 import com.siteflow.signature.core.data.networking.client.NetworkConfig
 import com.siteflow.signature.core.logger.ReceeLogger
+import com.siteflow.signature.core.util.idempotencyKey
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -65,6 +67,9 @@ class TokenRefreshManager(
             try {
                 val response = rawClient.post(NetworkConfig.v1("auth/refresh")) {
                     contentType(ContentType.Application.Json)
+                    // Raw client bypasses AuthInterceptor, so add the required
+                    // Idempotency-Key here too (refresh is a POST).
+                    header("Idempotency-Key", idempotencyKey())
                     setBody(RefreshTokenRequestDto(refreshToken = refreshToken))
                 }
 

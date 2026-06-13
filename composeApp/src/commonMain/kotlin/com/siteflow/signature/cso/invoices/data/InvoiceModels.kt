@@ -17,6 +17,7 @@ enum class InvoiceStatus(
     SUBMITTED("Submitted", Color(0xFF6B7280), Color(0xFFF3F4F6)),
     ASE_APPROVED("ASE Approved", Color(0xFF3B82F6), Color(0xFFDBEAFE)),
     ASM_APPROVED("ASM Approved", Color(0xFF8B5CF6), Color(0xFFEDE9FE)),
+    RSM_APPROVED("RSM Approved", Color(0xFF7C3AED), Color(0xFFEDE9FE)),
     FINANCE_APPROVED("Finance Approved", Color(0xFF10B981), Color(0xFFD1FAE5)),
     CALCULATED("Calculated", Color(0xFFEC4899), Color(0xFFFCE7F3)),
     PAID("Paid", Color(0xFF059669), Color(0xFFD1FAE5)),

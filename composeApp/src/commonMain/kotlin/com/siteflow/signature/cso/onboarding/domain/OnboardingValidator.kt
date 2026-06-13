@@ -19,8 +19,13 @@ object OnboardingValidator {
     }
 
     fun isStep2Valid(state: OnboardingState): Boolean {
-        // Dynamic payout: always valid (slab auto-selected from API)
-        // Fixed payout: require both volume and amount fields
+        // Outlet economics are required by the backend (@NotNull) for every outlet.
+        val economicsFilled = state.monthlyRentalAmount.isNotBlank() &&
+            state.expectedSalesPotential.isNotBlank()
+        if (!economicsFilled) return false
+
+        // Dynamic payout: slab auto-selected from API.
+        // Fixed payout: require both volume and amount commitment fields.
         return when (state.payoutType) {
             PayoutType.DYNAMIC -> true
             PayoutType.FIXED ->

@@ -1,6 +1,7 @@
 package com.siteflow.signature.di
 
 import com.siteflow.signature.cso.di.csoModule
+import com.siteflow.signature.ase.di.aseModule
 import com.siteflow.signature.asm.di.asmModule
 import com.siteflow.signature.login.di.loginModule
 import com.siteflow.signature.outlet.di.outletModule
@@ -11,6 +12,7 @@ val appModules = listOf(
     viewModelModule,
     loginModule,
     csoModule,
+    aseModule,
     asmModule,
     outletModule,
     supportModule,

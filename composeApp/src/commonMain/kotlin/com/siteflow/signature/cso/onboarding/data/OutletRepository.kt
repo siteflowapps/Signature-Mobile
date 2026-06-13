@@ -138,6 +138,8 @@ class OutletRepository(
             slabId = state.selectedSlabId.ifBlank { null },
             distributorId = distributorId,
             plannedAnnualVolume = annualVolume,
+            monthlyRentalAmount = state.monthlyRentalAmount.toIntOrNull() ?: 0,
+            expectedSalesPotential = state.expectedSalesPotential.toIntOrNull() ?: 0,
             stockingCommitment = emptyList(),
             upiId = state.upiId.ifBlank { null },
             bankAccountNumber = state.accountNumber,
@@ -147,7 +149,9 @@ class OutletRepository(
             bankName = state.bankName,
             branch = state.branchName.ifBlank { null },
             payoutType = if (isFixed) "FIXED" else "DYNAMIC",
-            slabClassification = state.selectedClassification.ifBlank { null },
+            // Backend requires slabClassification (@NotNull). For FIXED the
+            // classification UI is hidden, so default to SILVER when unset.
+            slabClassification = state.selectedClassification.ifBlank { "SILVER" },
             monthlyVolumeCommitment = if (isFixed) state.fixedMonthlyVolume.toIntOrNull() else null,
             monthlyPayoutAmount = if (isFixed) state.fixedMonthlyAmount.toIntOrNull() else null
         )
@@ -343,46 +347,40 @@ class OutletRepository(
     }
 
     /**
-     * ASM approves the outlet. Status becomes ASM_APPROVED.
+     * Approve/reject an outlet via the unified decision endpoint. The backend
+     * resolves L1 (ASE on ASE_PENDING) vs L2 (ASM on ASM_PENDING) from the
+     * caller's role + the outlet's status.
+     *
+     * @param action "APPROVE" | "REJECT" | "RESUBMIT"
      */
-    suspend fun asmApprove(
-        outletId: String
-    ): NetworkResult<OutletResponseData, ApiError> {
-        println("┌── ASM Approve ──────────────────────")
-        println("│ outletId : $outletId")
-        println("└──────────────────────────────────────")
-
-        return outletApi.asmApprove(outletId).map { response ->
-            val data = response.data
-            if (response.success && data != null) {
-                data
-            } else {
-                throw Exception(response.error ?: "Failed to approve outlet")
-            }
-        }
-    }
-
-    /**
-     * ASM rejects the outlet.
-     */
-    suspend fun asmReject(
+    suspend fun decide(
         outletId: String,
-        remarks: String
+        action: String,
+        reason: String? = null
     ): NetworkResult<OutletResponseData, ApiError> {
-        println("┌── ASM Reject ───────────────────────")
+        println("┌── Outlet Decision ──────────────────")
         println("│ outletId : $outletId")
-        println("│ remarks  : $remarks")
+        println("│ action   : $action")
+        println("│ reason   : $reason")
         println("└──────────────────────────────────────")
 
-        return outletApi.asmReject(outletId, remarks).map { response ->
+        return outletApi.decide(outletId, action, reason).map { response ->
             val data = response.data
             if (response.success && data != null) {
                 data
             } else {
-                throw Exception(response.error ?: "Failed to reject outlet")
+                throw Exception(response.error ?: "Failed to $action outlet")
             }
         }
     }
+
+    /** ASM L2 approve — delegates to the unified [decide] endpoint. */
+    suspend fun asmApprove(outletId: String): NetworkResult<OutletResponseData, ApiError> =
+        decide(outletId, "APPROVE")
+
+    /** ASM L2 reject — delegates to the unified [decide] endpoint. */
+    suspend fun asmReject(outletId: String, remarks: String): NetworkResult<OutletResponseData, ApiError> =
+        decide(outletId, "REJECT", remarks)
 
     /**
      * ASE requests an asset (cooler/branding) for an approved outlet.
