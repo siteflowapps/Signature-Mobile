@@ -21,13 +21,12 @@ fun BottomCtaBar(
     outlet: OutletItem,
     onAction: () -> Unit,
     onSubmitCompliance: () -> Unit,
-    onUploadSignaturePhoto: () -> Unit,
-    onRequestAsset: () -> Unit = {}
+    onUploadSignaturePhoto: () -> Unit
 ) {
+    // Cooler/branding raise + compliance live on the AssetCards; this bar only
+    // handles onboarding resubmit and signature-verification compliance.
     val (label, color, action) = when {
         outlet.status == OutletStatus.ASM_REJECTED -> Triple("Edit & Resubmit", AppColors.Danger, onAction)
-        outlet.status == OutletStatus.ASM_APPROVED && outlet.assetStatus == AssetStatus.NOT_REQUESTED ->
-            Triple("Request Asset", AppColors.BlueGradientStart, onRequestAsset)
         outlet.assetStatus == AssetStatus.VERIFICATION_PENDING -> return // compliance already submitted
         outlet.nextPendingStep == SignatureStep.SIGNATURE_VERIFICATION -> Triple("Submit Compliance", AppColors.BlueGradientStart, onSubmitCompliance)
         else -> return

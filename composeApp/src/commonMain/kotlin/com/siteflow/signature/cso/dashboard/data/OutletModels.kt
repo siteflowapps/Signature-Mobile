@@ -7,19 +7,23 @@ import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.util.toTitleCase
 
 /**
- * The 5 steps of Signature (Complete Definition of an Outlet).
+ * The 5 macro steps of the Signature pipeline.
  *
- * 1. Enrollment      — Outlet Onboarding + PFP Enrollment (ASE in field)
- * 2. ASM Approval    — Manager approves the enrollment (ASM)
- * 3. Asset Request   — ASE requests cooler/branding asset for the outlet
- * 4. DMS Linking     — ASE gets DMS number from business, links to outlet
- * 5. Signature Verify      — Branding + Cooler installed & verified with photos (ASE)
+ * Flow: CSO enrolls → ASE reviews (L1) → ASM approves (L2) → CSO raises assets
+ *       → Compliance verified.
+ *
+ * 1. ENROLLMENT           — CSO completes 6-step onboarding & submits PFP enrollment
+ * 2. ASE_APPROVAL         — Area Sales Executive performs L1 review
+ * 3. ASM_APPROVAL         — Account Sales Manager performs L2 review & approves outlet
+ * 4. ASSET_REQUEST        — CSO requests cooler + branding assets for the outlet
+ * 5. SIGNATURE_VERIFICATION — Assets installed; compliance photos verified
  */
 enum class SignatureStep(val label: String) {
     ENROLLMENT("Enrollment"),
+    ASE_APPROVAL("ASE Review"),
     ASM_APPROVAL("ASM Approval"),
     ASSET_REQUEST("Asset Request"),
-    SIGNATURE_VERIFICATION("Signature Verification")
+    SIGNATURE_VERIFICATION("Signature Verified")
 }
 
 /**
@@ -77,6 +81,28 @@ enum class OutletStatus(
             else -> DRAFT_BASIC
         }
     }
+}
+
+/**
+ * Coarse cooler status shown on the outlet card/detail, derived from the
+ * backend's coolerComplianceStatus. Returns null for NOT_REQUESTED (no chip).
+ */
+fun coolerStatusLabel(coolerComplianceStatus: String): String? =
+    assetStatusLabel("Cooler", coolerComplianceStatus)
+
+/** Same coarse mapping for the branding/marketing chip. */
+fun marketingStatusLabel(marketingComplianceStatus: String): String? =
+    assetStatusLabel("Branding", marketingComplianceStatus)
+
+/** Shared mapping for an asset compliance chip; null for NOT_REQUESTED (no chip). */
+private fun assetStatusLabel(prefix: String, status: String): String? = when (status) {
+    "REQUESTED" -> "$prefix: Requested"
+    "PENDING_PHOTO" -> "$prefix: Awaiting compliance"
+    "SUBMITTED" -> "$prefix: Compliance submitted"
+    "COMPLIANT" -> "$prefix: Compliant"
+    "OVERDUE" -> "$prefix: Compliance overdue"
+    "NON_COMPLIANT" -> "$prefix: Non-compliant"
+    else -> null // NOT_REQUESTED
 }
 
 /**
@@ -174,6 +200,14 @@ data class OutletItem(
     val createdAtRaw: String = "",  // Original creation time
     val updatedAtRaw: String = "",  // Latest activity time for sorting
     val assetStatus: AssetStatus = AssetStatus.NOT_REQUESTED,
+    /** Backend coolerComplianceStatus (NOT_REQUESTED/REQUESTED/PENDING_PHOTO/SUBMITTED/COMPLIANT/OVERDUE/NON_COMPLIANT). */
+    val coolerComplianceStatus: String = "NOT_REQUESTED",
+    /** True once a cooler request exists (coolerComplianceStatus != NOT_REQUESTED). */
+    val coolerRequested: Boolean = false,
+    /** Cooler installed, awaiting a compliance photo (CSO/ASE can upload). */
+    val coolerNeedsCompliance: Boolean = false,
+    /** Backend marketingComplianceStatus (same value set as cooler). */
+    val marketingComplianceStatus: String = "NOT_REQUESTED",
     val complianceId: String = "",
     val complianceState: ComplianceState = ComplianceState.NONE,
     val complianceRecords: List<ComplianceRecord> = emptyList(),
@@ -286,6 +320,10 @@ data class OutletItem(
                 createdAtRaw = dto.createdAt ?: "",
                 updatedAtRaw = dto.updatedAt ?: dto.createdAt ?: "",
                 assetStatus = AssetStatus.fromBackend(dto.assetStatus),
+                coolerComplianceStatus = dto.coolerComplianceStatus ?: "NOT_REQUESTED",
+                coolerRequested = (dto.coolerComplianceStatus ?: "NOT_REQUESTED") != "NOT_REQUESTED",
+                coolerNeedsCompliance = (dto.coolerComplianceStatus ?: "") in setOf("PENDING_PHOTO", "OVERDUE", "NON_COMPLIANT"),
+                marketingComplianceStatus = dto.marketingComplianceStatus ?: "NOT_REQUESTED",
                 complianceId = dto.complianceId ?: "",
                 complianceState = ComplianceState.fromBackend(dto.complianceState),
                 dmsId = dto.dmsId ?: "",
@@ -342,28 +380,52 @@ data class OutletItem(
         ): Set<SignatureStep> {
             val steps = mutableSetOf<SignatureStep>()
             when (status) {
+                // ── Draft: no macro steps complete yet ──
                 OutletStatus.DRAFT_BASIC,
                 OutletStatus.DRAFT_BUSINESS_DETAILS,
                 OutletStatus.DRAFT_KYC,
                 OutletStatus.DRAFT_PHOTOS,
                 OutletStatus.AGREEMENT_PENDING -> { /* no steps */ }
-                // CSO has finished enrollment; awaiting/cleared L1 (ASE) review.
-                OutletStatus.ASE_PENDING,
-                OutletStatus.ASE_APPROVED,
-                OutletStatus.ASE_REJECTED -> steps.add(SignatureStep.ENROLLMENT)
-                OutletStatus.ASM_PENDING -> steps.add(SignatureStep.ENROLLMENT)
-                OutletStatus.ASM_REJECTED -> steps.add(SignatureStep.ENROLLMENT)
-                OutletStatus.ASM_APPROVED -> {
+
+                // ── Step 1 complete: CSO enrolled, awaiting ASE L1 review ──
+                OutletStatus.ASE_PENDING ->
                     steps.add(SignatureStep.ENROLLMENT)
-                    steps.add(SignatureStep.ASM_APPROVAL)
+
+                // ── Step 1 + 2 complete: ASE approved, awaiting ASM L2 ──
+                OutletStatus.ASE_APPROVED ->
+                    steps.addAll(listOf(SignatureStep.ENROLLMENT, SignatureStep.ASE_APPROVAL))
+
+                // ── Step 1 done, ASE rejected: enrollment submitted, L1 rejected ──
+                OutletStatus.ASE_REJECTED ->
+                    steps.add(SignatureStep.ENROLLMENT)
+
+                // ── Step 1 + 2 complete: ASE approved, ASM reviewing ──
+                OutletStatus.ASM_PENDING ->
+                    steps.addAll(listOf(SignatureStep.ENROLLMENT, SignatureStep.ASE_APPROVAL))
+
+                // ── Step 1 + 2 complete, ASM rejected ──
+                OutletStatus.ASM_REJECTED ->
+                    steps.addAll(listOf(SignatureStep.ENROLLMENT, SignatureStep.ASE_APPROVAL))
+
+                // ── Step 1 + 2 + 3 complete: ASM approved, outlet active ──
+                OutletStatus.ASM_APPROVED -> {
+                    steps.addAll(
+                        listOf(
+                            SignatureStep.ENROLLMENT,
+                            SignatureStep.ASE_APPROVAL,
+                            SignatureStep.ASM_APPROVAL
+                        )
+                    )
                 }
+
+                // ── All 5 steps complete ──
                 OutletStatus.ONBOARDED -> return SignatureStep.entries.toSet()
             }
-            // Asset request step
+            // Step 4 — Asset Request: complete when at least one asset raised
             if (assetStatus != AssetStatus.NOT_REQUESTED) {
                 steps.add(SignatureStep.ASSET_REQUEST)
             }
-            // Signature Verification step — complete only when ASM has verified (VERIFIED status)
+            // Step 5 — Signature Verification: complete when fully verified
             if (assetStatus == AssetStatus.VERIFIED) {
                 steps.add(SignatureStep.SIGNATURE_VERIFICATION)
             }

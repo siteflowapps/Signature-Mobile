@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,8 +37,12 @@ import coil3.compose.AsyncImage
 import com.siteflow.signature.cso.dashboard.data.AssetStatus
 import com.siteflow.signature.cso.dashboard.data.SignatureStep
 import com.siteflow.signature.cso.dashboard.data.OutletItem
+import com.siteflow.signature.cso.dashboard.data.OutletStatus
 import com.siteflow.signature.cso.dashboard.data.TimelineEntry
 import com.siteflow.signature.cso.onboarding.data.PhotoSlot
+import com.siteflow.signature.core.presentation.components.HorizontalSignatureStepper
+import com.siteflow.signature.core.presentation.components.StepState
+import com.siteflow.signature.core.presentation.components.StepperItem
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 
@@ -160,92 +165,53 @@ fun OutletInfoCard(outlet: OutletItem) {
     }
 }
 
-// ── Onboarding Progress Card ──
+// ══════════════════════════════════════════════════════════════════════
+// Signature Journey Card — 5-step horizontal stepper
+// ══════════════════════════════════════════════════════════════════════
 
+/**
+ * Redesigned macro-pipeline card showing the full 5-step Signature journey
+ * (Enrollment → ASE Review → ASM Approval → Asset Request → Signature Verified).
+ * Replaces the old flat list with an interactive horizontal stepper.
+ */
 @Composable
 fun SignaturePipelineCard(outlet: OutletItem) {
-    var expanded by remember { mutableStateOf(false) }
-
-    SectionCard("Onboarding Progress", trailing = "${outlet.completedSteps.size}/${SignatureStep.entries.size} Steps") {
-        LinearProgressIndicator(
-            progress = { outlet.completionPercent / 100f },
-            modifier = Modifier.fillMaxWidth().height(4.dp),
-            color = AppColors.Success,
-            trackColor = AppColors.Divider,
-            strokeCap = StrokeCap.Round
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        val visibleSteps = if (expanded) SignatureStep.entries else listOf(
-            SignatureStep.entries.firstOrNull { it !in outlet.completedSteps } ?: SignatureStep.entries.last()
-        )
-
-        visibleSteps.forEachIndexed { index, step ->
-            val isDone = step in outlet.completedSteps
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    imageVector = if (isDone) Icons.Default.CheckCircle else Icons.Outlined.Circle,
-                    contentDescription = step.label,
-                    tint = if (isDone) AppColors.Success else AppColors.PlaceholderTextColor,
-                    modifier = Modifier.size(22.dp)
-                )
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = step.label,
-                        style = AppTypography.BodyPrimary.copy(
-                            fontSize = 14.sp,
-                            fontWeight = if (isDone) FontWeight.Medium else FontWeight.Normal
-                        ),
-                        color = if (isDone) AppColors.TextPrimary else AppColors.TextSecondary
-                    )
-                    Text(
-                        text = "Step ${SignatureStep.entries.indexOf(step) + 1}",
-                        style = AppTypography.Caption.copy(fontSize = 11.sp),
-                        color = AppColors.TextTertiary
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .background(
-                            if (isDone) AppColors.greenE7 else AppColors.greyF6,
-                            RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = if (isDone) "Done" else "Pending",
-                        style = AppTypography.Caption.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = if (isDone) AppColors.Success else AppColors.PlaceholderTextColor
-                    )
-                }
-            }
-
-            if (index < visibleSteps.size - 1) {
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = AppColors.Divider, modifier = Modifier.padding(start = 34.dp))
-                Spacer(Modifier.height(12.dp))
-            }
+    val steps = SignatureStep.entries.map { step ->
+        val isDone     = step in outlet.completedSteps
+        val isRejected = when (step) {
+            SignatureStep.ASE_APPROVAL -> outlet.status == OutletStatus.ASE_REJECTED
+            SignatureStep.ASM_APPROVAL -> outlet.status == OutletStatus.ASM_REJECTED
+            else                       -> false
         }
+        val isActive = !isDone && !isRejected && step == outlet.nextPendingStep
+        StepperItem(
+            label = step.label,
+            state = when {
+                isDone     -> StepState.DONE
+                isRejected -> StepState.REJECTED
+                isActive   -> StepState.ACTIVE
+                else       -> StepState.PENDING
+            }
+        )
+    }
 
-        Spacer(Modifier.height(12.dp))
+    SectionCard(
+        title    = "Signature Journey",
+        trailing = "${outlet.completedSteps.size}/${SignatureStep.entries.size} done"
+    ) {
+        HorizontalSignatureStepper(
+            steps    = steps,
+            dotSize  = 28.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        // ── Completion Banner ──
+        // Completion banner
         if (outlet.assetStatus == AssetStatus.VERIFIED) {
+            Spacer(Modifier.height(14.dp))
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = AppColors.greenE7
+                shape    = RoundedCornerShape(12.dp),
+                color    = AppColors.CtaGreenBg
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -255,36 +221,284 @@ fun SignaturePipelineCard(outlet: OutletItem) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = AppColors.Success,
+                        tint = AppColors.StepDone,
                         modifier = Modifier.size(22.dp)
                     )
                     Column {
                         Text(
-                            text = "Signature Complete!",
+                            text  = "Signature Activated! 🎉",
                             style = AppTypography.BodyPrimary.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
+                                fontSize   = 14.sp
                             ),
                             color = AppColors.green3D
                         )
                         Text(
-                            text = "All steps verified — outlet is fully onboarded.",
+                            text  = "All steps verified — outlet is fully onboarded.",
                             style = AppTypography.Caption.copy(fontSize = 12.sp),
                             color = AppColors.green4A
                         )
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
         }
+    }
+}
 
-        Text(
-            text = if (expanded) "Show Less" else "View All Steps",
-            style = AppTypography.Button.copy(fontSize = 13.sp),
-            color = AppColors.BlueGradientStart,
-            modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(vertical = 4.dp),
-            textAlign = TextAlign.Center
+// ══════════════════════════════════════════════════════════════════════
+// Next Action Card — context-aware CTA (NEW)
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Prominent, context-aware card that tells the CSO exactly what to do next.
+ * Appears immediately after the Signature Journey Card on the detail page.
+ *
+ * @param outlet                 Current outlet data.
+ * @param onContinueOnboarding   Navigate back into the onboarding flow.
+ * @param onRequestCooler        Open cooler request bottom sheet.
+ * @param onRequestBranding      Open branding request bottom sheet.
+ * @param onUploadCompliance     Open compliance upload picker.
+ */
+@Composable
+fun NextActionCard(
+    outlet: OutletItem,
+    onContinueOnboarding: () -> Unit = {},
+    onRequestCooler: () -> Unit = {},
+    onRequestBranding: () -> Unit = {},
+    onUploadCompliance: () -> Unit = {}
+) {
+    // Fully verified — no CTA needed
+    if (outlet.assetStatus == AssetStatus.VERIFIED) return
+
+    data class CtaConfig(
+        val icon: ImageVector,
+        val iconTint: Color,
+        val bgColor: Color,
+        val borderColor: Color,
+        val title: String,
+        val subtitle: String,
+        val primaryLabel: String?,
+        val secondaryLabel: String?,
+        val onPrimary: () -> Unit,
+        val onSecondary: () -> Unit
+    )
+
+    val config: CtaConfig = when {
+        // ── Draft: still enrolling ──
+        outlet.isContinuingOnboarding -> CtaConfig(
+            icon          = Icons.Default.Info,
+            iconTint      = AppColors.StepActive,
+            bgColor       = AppColors.CtaBlueBg,
+            borderColor   = AppColors.StepActiveBg,
+            title         = "Complete Outlet Setup",
+            subtitle      = "Step ${outlet.onboardingStep - 1} of 6 done — tap to resume where you left off.",
+            primaryLabel  = "Resume Setup →",
+            secondaryLabel = null,
+            onPrimary     = onContinueOnboarding,
+            onSecondary   = {}
         )
+
+        // ── ASE rejected enrollment ──
+        outlet.status == OutletStatus.ASE_REJECTED -> CtaConfig(
+            icon          = Icons.Default.Warning,
+            iconTint      = AppColors.StepRejected,
+            bgColor       = AppColors.CtaRedBg,
+            borderColor   = AppColors.StepRejectedBg,
+            title         = "L1 Review — Rejected",
+            subtitle      = "The enrollment was rejected by the Area Sales Executive. Review the feedback and resubmit.",
+            primaryLabel  = "Fix & Resubmit →",
+            secondaryLabel = null,
+            onPrimary     = onContinueOnboarding,
+            onSecondary   = {}
+        )
+
+        // ── Awaiting ASE review ──
+        outlet.status == OutletStatus.ASE_PENDING -> CtaConfig(
+            icon          = Icons.Default.Info,
+            iconTint      = AppColors.Warning,
+            bgColor       = AppColors.CtaAmberBg,
+            borderColor   = AppColors.AssetPendingBg,
+            title         = "Awaiting L1 Review",
+            subtitle      = "Your enrollment is with the Area Sales Executive for approval.",
+            primaryLabel  = null,
+            secondaryLabel = null,
+            onPrimary     = {},
+            onSecondary   = {}
+        )
+
+        // ── ASM rejected ──
+        outlet.status == OutletStatus.ASM_REJECTED -> CtaConfig(
+            icon          = Icons.Default.Warning,
+            iconTint      = AppColors.StepRejected,
+            bgColor       = AppColors.CtaRedBg,
+            borderColor   = AppColors.StepRejectedBg,
+            title         = "L2 Approval — Rejected",
+            subtitle      = "The ASM has rejected this enrollment. Address the issues and resubmit.",
+            primaryLabel  = "Fix & Resubmit →",
+            secondaryLabel = null,
+            onPrimary     = onContinueOnboarding,
+            onSecondary   = {}
+        )
+
+        // ── Awaiting ASM review ──
+        outlet.status == OutletStatus.ASM_PENDING -> CtaConfig(
+            icon          = Icons.Default.Info,
+            iconTint      = AppColors.Warning,
+            bgColor       = AppColors.CtaAmberBg,
+            borderColor   = AppColors.AssetPendingBg,
+            title         = "Awaiting L2 Approval",
+            subtitle      = "L1 approved. The Account Sales Manager is reviewing this outlet.",
+            primaryLabel  = null,
+            secondaryLabel = null,
+            onPrimary     = {},
+            onSecondary   = {}
+        )
+
+        // ── ASM approved, no assets raised yet — the key action state ──
+        outlet.status == OutletStatus.ASM_APPROVED &&
+        outlet.assetStatus == AssetStatus.NOT_REQUESTED -> CtaConfig(
+            icon          = Icons.Default.CheckCircle,
+            iconTint      = AppColors.StepActive,
+            bgColor       = AppColors.CtaBlueBg,
+            borderColor   = AppColors.StepActiveBg,
+            title         = "Outlet Approved — Start Signature Setup",
+            subtitle      = "Request a cooler and branding assets to begin the Signature activation.",
+            primaryLabel  = "Request Cooler",
+            secondaryLabel = "Request Branding",
+            onPrimary     = onRequestCooler,
+            onSecondary   = onRequestBranding
+        )
+
+        // ── Compliance photo needed ──
+        outlet.coolerNeedsCompliance -> CtaConfig(
+            icon          = Icons.Default.Warning,
+            iconTint      = AppColors.Warning,
+            bgColor       = AppColors.CtaAmberBg,
+            borderColor   = AppColors.AssetPendingBg,
+            title         = "Compliance Photo Required",
+            subtitle      = "The cooler has been installed. Upload a compliance photo to complete the step.",
+            primaryLabel  = "Upload Compliance Photo →",
+            secondaryLabel = null,
+            onPrimary     = onUploadCompliance,
+            onSecondary   = {}
+        )
+
+        // ── Verification pending (assets submitted) ──
+        outlet.assetStatus == AssetStatus.VERIFICATION_PENDING -> CtaConfig(
+            icon          = Icons.Default.Info,
+            iconTint      = AppColors.StepActive,
+            bgColor       = AppColors.CtaBlueBg,
+            borderColor   = AppColors.StepActiveBg,
+            title         = "Signature Verification In Progress",
+            subtitle      = "Compliance submitted — awaiting final verification by the ASM.",
+            primaryLabel  = null,
+            secondaryLabel = null,
+            onPrimary     = {},
+            onSecondary   = {}
+        )
+
+        // ── Default: no specific action ──
+        else -> return
+    }
+
+    Card(
+        modifier  = Modifier.fillMaxWidth(),
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = config.bgColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border    = androidx.compose.foundation.BorderStroke(1.dp, config.borderColor)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = config.icon,
+                    contentDescription = null,
+                    tint = config.iconTint,
+                    modifier = Modifier.size(22.dp).padding(top = 1.dp)
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text  = config.title,
+                        style = AppTypography.TitleMedium.copy(
+                            fontSize   = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = AppColors.TextPrimary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text  = config.subtitle,
+                        style = AppTypography.Caption.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                        color = AppColors.TextSecondary
+                    )
+                }
+            }
+
+            // Action buttons (if any)
+            if (config.primaryLabel != null) {
+                Spacer(Modifier.height(14.dp))
+                if (config.secondaryLabel != null) {
+                    // Two side-by-side buttons (e.g. Request Cooler + Request Branding)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = config.onPrimary,
+                            shape   = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f),
+                            colors  = ButtonDefaults.outlinedButtonColors(
+                                contentColor = config.iconTint
+                            ),
+                            border  = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                                brush = Brush.horizontalGradient(
+                                    listOf(config.iconTint, config.iconTint)
+                                )
+                            )
+                        ) {
+                            Text(
+                                text  = config.primaryLabel,
+                                style = AppTypography.Button.copy(fontSize = 13.sp)
+                            )
+                        }
+                        Button(
+                            onClick = config.onSecondary,
+                            shape   = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f),
+                            colors  = ButtonDefaults.buttonColors(
+                                containerColor = config.iconTint
+                            )
+                        ) {
+                            Text(
+                                text  = config.secondaryLabel,
+                                style = AppTypography.Button.copy(fontSize = 13.sp),
+                                color = Color.White
+                            )
+                        }
+                    }
+                } else {
+                    // Single full-width button
+                    Button(
+                        onClick  = config.onPrimary,
+                        shape    = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors   = ButtonDefaults.buttonColors(
+                            containerColor = config.iconTint
+                        )
+                    ) {
+                        Text(
+                            text  = config.primaryLabel,
+                            style = AppTypography.Button.copy(fontSize = 13.sp),
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -54,7 +54,7 @@ import com.siteflow.signature.cso.onboarding.data.PhotoSlot
 import com.siteflow.signature.cso.dashboard.domain.OutletDetailAction
 import com.siteflow.signature.cso.dashboard.domain.OutletDetailEvent
 import com.siteflow.signature.cso.dashboard.domain.OutletDetailViewModel
-import com.siteflow.signature.cso.dashboard.domain.CsoDashboardViewModel
+import com.siteflow.signature.asset.approvals.presentation.AssetCard
 import com.siteflow.signature.core.domain.ImagePicker
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
@@ -73,17 +73,19 @@ fun OutletDetailScreen(
     onUploadSignaturePhoto: () -> Unit = {},
     onAssetRequestSuccess: () -> Unit = {},
     viewModel: OutletDetailViewModel = koinInject(),
-    dashboardViewModel: CsoDashboardViewModel = koinInject(),
     imagePicker: ImagePicker = koinInject()
 ) {
     var showAssetRequestSheet by remember { mutableStateOf(false) }
+    var showMarketingSheet by remember { mutableStateOf(false) }
 
     // Image Picker State
     var activeSlotId by remember { mutableStateOf<String?>(null) }
     var showImageSourceSheet by remember { mutableStateOf(false) }
+    // When non-null, the next picked image is a compliance photo for this kind
+    // ("COOLER"|"MARKETING") rather than a signature photo.
+    var complianceKind by remember { mutableStateOf<String?>(null) }
     var showCameraPermissionDialog by remember { mutableStateOf(false) }
 
-    val dashboardState by dashboardViewModel.state.collectAsState()
     val detailState by viewModel.state.collectAsState()
 
     // Navigate back to outlet list on asset request success
@@ -96,16 +98,12 @@ fun OutletDetailScreen(
         }
     }
 
-    // Look up outlet from the dashboard's already-loaded list (same as ASM pattern)
-    val outlet = detailState.outlet ?: dashboardState.outlets.firstOrNull { it.id == outletId }
-
-    // Sync into detail ViewModel if found from dashboard
-    LaunchedEffect(outlet) {
-        if (outlet != null && detailState.outlet == null) {
-            viewModel.updateOutlet(outlet)
-        }
+    // Fetch the full, fresh outlet from GET /outlets/{id} (not the list item).
+    LaunchedEffect(outletId) {
+        viewModel.onAction(OutletDetailAction.LoadById(outletId))
     }
 
+    val outlet = detailState.outlet
     if (outlet == null) {
         SkeletonOutletDetail()
         return
@@ -121,10 +119,11 @@ fun OutletDetailScreen(
         )
     }
 
+    // Cooler/branding raise + compliance now live on the AssetCards above; the
+    // bottom bar only covers onboarding resubmit + signature-verification compliance.
     val showCta = outlet.assetStatus != AssetStatus.VERIFIED &&
         outlet.assetStatus != AssetStatus.VERIFICATION_PENDING && (
         outlet.status == OutletStatus.ASM_REJECTED ||
-        (outlet.status == OutletStatus.ASM_APPROVED && outlet.assetStatus == AssetStatus.NOT_REQUESTED) ||
         outlet.nextPendingStep == SignatureStep.SIGNATURE_VERIFICATION
     )
 
@@ -143,14 +142,41 @@ fun OutletDetailScreen(
         ) {
             OutletInfoCard(outlet)
             SignaturePipelineCard(outlet)
-            if (outlet.timeline.isNotEmpty()) {
-                TimelineCard(outlet.timeline)
-            }
+
+            // ── Next Action: context-aware CTA (new) ──
+            NextActionCard(
+                outlet               = outlet,
+                onContinueOnboarding = onContinueOnboarding,
+                onRequestCooler      = { showAssetRequestSheet = true },
+                onRequestBranding    = { showMarketingSheet    = true },
+                onUploadCompliance   = {
+                    complianceKind = "COOLER"
+                    showImageSourceSheet = true
+                }
+            )
+
+            // Asset requests (raise / approve-status / compliance) — cooler + branding.
+            AssetCard(
+                outlet = outlet,
+                kind = "COOLER",
+                onRequest = { showAssetRequestSheet = true },
+                onUploadCompliance = { complianceKind = "COOLER"; showImageSourceSheet = true }
+            )
+            AssetCard(
+                outlet = outlet,
+                kind = "MARKETING",
+                onRequest = { showMarketingSheet = true },
+                onUploadCompliance = { complianceKind = "MARKETING"; showImageSourceSheet = true }
+            )
+
             OutletDetailsCard(outlet)
             OnboardingPhotosCard(outlet)
             ComplianceRecordCard(outlet)
             if (outlet.photoSlots.isNotEmpty()) {
                 PhotosCard(outlet, onViewPhoto = { selectedPhoto = it })
+            }
+            if (outlet.timeline.isNotEmpty()) {
+                TimelineCard(outlet.timeline)
             }
             if (outlet.distributorName.isNotBlank()) {
                 DistributorDetailsCard(outlet)
@@ -163,6 +189,7 @@ fun OutletDetailScreen(
             if (showCta) {
                 Spacer(Modifier.height(8.dp))
             }
+
         }
 
         // Fixed bottom CTA
@@ -174,9 +201,6 @@ fun OutletDetailScreen(
                 onUploadSignaturePhoto = {
                     activeSlotId = "add_new"
                     showImageSourceSheet = true
-                },
-                onRequestAsset = {
-                    showAssetRequestSheet = true
                 }
             )
         }
@@ -185,15 +209,30 @@ fun OutletDetailScreen(
     if (showAssetRequestSheet) {
         AssetRequestBottomSheet(
             onDismiss = { showAssetRequestSheet = false },
-            onSubmit = { coolerType, capacity, signageType, dmsId ->
+            onSubmit = { coolerSize, quantity, details ->
                 showAssetRequestSheet = false
                 viewModel.onAction(
-                    OutletDetailAction.RequestAsset(
+                    OutletDetailAction.RequestCooler(
                         outletId = outlet.id,
-                        coolerType = coolerType,
-                        capacity = capacity,
-                        signageType = signageType,
-                        dmsId = dmsId
+                        coolerSize = coolerSize,
+                        quantity = quantity,
+                        details = details
+                    )
+                )
+            }
+        )
+    }
+
+    if (showMarketingSheet) {
+        MarketingRequestBottomSheet(
+            onDismiss = { showMarketingSheet = false },
+            onSubmit = { items, details ->
+                showMarketingSheet = false
+                viewModel.onAction(
+                    OutletDetailAction.RequestMarketing(
+                        outletId = outlet.id,
+                        items = items,
+                        details = details
                     )
                 )
             }
@@ -243,10 +282,12 @@ fun OutletDetailScreen(
                         showImageSourceSheet = false
                         imagePicker.openCamera(
                             onImagePicked = { path ->
-                                activeSlotId?.let { slotId ->
-                                    viewModel.onAction(
-                                        OutletDetailAction.PhotoCaptured(slotId, path)
-                                    )
+                                val kind = complianceKind
+                                if (kind != null) {
+                                    complianceKind = null
+                                    viewModel.onAction(OutletDetailAction.UploadCompliance(outlet.id, kind, path))
+                                } else activeSlotId?.let { slotId ->
+                                    viewModel.onAction(OutletDetailAction.PhotoCaptured(slotId, path))
                                 }
                             },
                             onPermissionDenied = {
@@ -287,10 +328,12 @@ fun OutletDetailScreen(
                     onClick = {
                         showImageSourceSheet = false
                         imagePicker.openGallery { path ->
-                            activeSlotId?.let { slotId ->
-                                viewModel.onAction(
-                                    OutletDetailAction.PhotoCaptured(slotId, path)
-                                )
+                            val kind = complianceKind
+                            if (kind != null) {
+                                complianceKind = null
+                                viewModel.onAction(OutletDetailAction.UploadCompliance(outlet.id, kind, path))
+                            } else activeSlotId?.let { slotId ->
+                                viewModel.onAction(OutletDetailAction.PhotoCaptured(slotId, path))
                             }
                         }
                     },

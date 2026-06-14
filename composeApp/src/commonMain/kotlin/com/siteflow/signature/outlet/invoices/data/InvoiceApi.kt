@@ -80,6 +80,20 @@ class InvoiceApi(
     }
 
     /**
+     * GET /invoices/{id}/details — full single-invoice detail (incl. eventLog
+     * timeline + createdBy), fetched fresh. Used by every role's detail screen.
+     */
+    suspend fun getInvoiceDetail(
+        invoiceId: String
+    ): NetworkResult<InvoiceDetailResponseDto, ApiError> {
+        return safeRequest<InvoiceDetailResponseDto>(
+            block = {
+                client.get(NetworkConfig.v1("invoices/$invoiceId/details"))
+            }
+        )
+    }
+
+    /**
      * POST /invoices/{id}/approve
      */
     suspend fun approveInvoice(

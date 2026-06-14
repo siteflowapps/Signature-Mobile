@@ -103,12 +103,22 @@ class OutletInvoiceViewModel(
     }
 
     private fun loadInvoiceDetail(invoiceId: String) {
-        val invoice = state.value.invoices.firstOrNull { it.id == invoiceId }
-        updateState { it.copy(selectedInvoice = invoice) }
-        if (invoice != null) {
+        // Instant paint from the list, then refresh with GET /invoices/{id}.
+        val cached = state.value.invoices.firstOrNull { it.id == invoiceId }
+        updateState { it.copy(selectedInvoice = cached) }
+        scope.launch {
+            invoiceApi.getInvoiceDetail(invoiceId)
+                .onSuccess { resp ->
+                    resp.data?.toInvoiceItem()?.let { fresh ->
+                        updateState { it.copy(selectedInvoice = fresh) }
+                    }
+                }
+                .onError { /* keep cached item on failure */ }
+        }
+        if (cached != null) {
             analytics.track(AnalyticsEvent.OutletEvent.InvoiceDetailViewed(
                 invoiceId = invoiceId,
-                invoiceStatus = invoice.status.name
+                invoiceStatus = cached.status.name
             ))
         }
     }

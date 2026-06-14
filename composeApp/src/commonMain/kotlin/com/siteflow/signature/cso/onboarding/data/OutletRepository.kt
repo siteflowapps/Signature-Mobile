@@ -106,14 +106,38 @@ class OutletRepository(
         }
     }
 
-    suspend fun getOutlets(page: Int = 0, size: Int = 20, showLoader: Boolean = true): NetworkResult<OutletListPageDto, ApiError> {
-        return outletApi.getOutlets(page, size, showLoader).map { response ->
-            if (response.success && response.data != null) {
-                response.data
-            } else {
-                throw Exception(response.error ?: "Failed to fetch outlets")
+    suspend fun getOutlets(
+        page: Int = 0,
+        size: Int = 20,
+        showLoader: Boolean = true,
+        coolerComplianceStatus: String? = null,
+        marketingComplianceStatus: String? = null
+    ): NetworkResult<OutletListPageDto, ApiError> {
+        return outletApi.getOutlets(page, size, showLoader, coolerComplianceStatus, marketingComplianceStatus)
+            .map { response ->
+                if (response.success && response.data != null) {
+                    response.data
+                } else {
+                    throw Exception(response.error ?: "Failed to fetch outlets")
+                }
             }
-        }
+    }
+
+    /**
+     * Count of (team-scoped) outlets whose [kind] asset is at [complianceStatus]
+     * — e.g. NOT_REQUESTED, for the CSO "to request" pills. Uses size=1 and reads
+     * the page's totalElements. Requires the backend compliance-status filter.
+     */
+    suspend fun countOutletsByCompliance(
+        kind: String,
+        complianceStatus: String
+    ): NetworkResult<Int, ApiError> {
+        val cooler = if (kind == "COOLER") complianceStatus else null
+        val marketing = if (kind == "MARKETING") complianceStatus else null
+        return outletApi.getOutlets(
+            page = 0, size = 1, showLoader = false,
+            coolerComplianceStatus = cooler, marketingComplianceStatus = marketing
+        ).map { it.data?.totalElements ?: 0 }
     }
 
     /**
@@ -383,37 +407,121 @@ class OutletRepository(
         decide(outletId, "REJECT", remarks)
 
     /**
-     * ASE requests an asset (cooler/branding) for an approved outlet.
+     * CSO raises a COOLER asset request for an ACTIVE outlet
+     * (POST /asset-requests, status -> REQUESTED).
      */
-    suspend fun requestAsset(
+    suspend fun requestCooler(
         outletId: String,
-        coolerType: String,
-        capacity: String,
-        signageType: String,
-        dmsId: String
-    ): NetworkResult<OutletResponseData, ApiError> {
-        println("┌── Request Asset ────────────────────")
-        println("│ outletId    : $outletId")
-        println("│ coolerType  : $coolerType")
-        println("│ capacity    : $capacity")
-        println("│ signageType : $signageType")
-        println("│ dmsId       : $dmsId")
+        coolerSize: String,
+        quantity: Int,
+        details: String?
+    ): NetworkResult<com.siteflow.signature.cso.onboarding.data.dto.AssetRequestData, ApiError> {
+        println("┌── Request Cooler ───────────────────")
+        println("│ outletId   : $outletId")
+        println("│ coolerSize : $coolerSize")
+        println("│ quantity   : $quantity")
+        println("│ details    : $details")
         println("└──────────────────────────────────────")
 
-        val request = com.siteflow.signature.cso.onboarding.data.dto.AssetRequestDto(
-            coolerType = coolerType,
-            capacity = capacity,
-            signageType = signageType,
-            dmsId = dmsId
+        val request = com.siteflow.signature.cso.onboarding.data.dto.CreateAssetRequestDto(
+            outletId = outletId,
+            kind = "COOLER",
+            coolerSize = coolerSize,
+            quantity = quantity,
+            details = details?.ifBlank { null }
         )
 
-        return outletApi.requestAsset(outletId, request).map { response ->
+        return outletApi.createAssetRequest(request).map { response ->
             val data = response.data
             if (response.success && data != null) {
                 data
             } else {
-                throw Exception(response.error ?: "Failed to request asset")
+                throw Exception(response.error ?: "Failed to raise cooler request")
             }
+        }
+    }
+
+    /**
+     * CSO raises a MARKETING/branding request for an ACTIVE outlet. Each item is
+     * {assetType, quantity, brands[]}; at least one required.
+     */
+    suspend fun requestMarketing(
+        outletId: String,
+        items: List<com.siteflow.signature.cso.onboarding.data.dto.MarketingItemDto>,
+        details: String?
+    ): NetworkResult<com.siteflow.signature.cso.onboarding.data.dto.AssetRequestData, ApiError> {
+        val request = com.siteflow.signature.cso.onboarding.data.dto.CreateAssetRequestDto(
+            outletId = outletId,
+            kind = "MARKETING",
+            items = items,
+            details = details?.ifBlank { null }
+        )
+        return outletApi.createAssetRequest(request).map { response ->
+            val data = response.data
+            if (response.success && data != null) data
+            else throw Exception(response.error ?: "Failed to raise branding request")
+        }
+    }
+
+    /**
+     * Team-scoped asset requests of [kind] at [status] (for the ASE/ASM approval
+     * finder). ASE sees REQUESTED, ASM sees ASE_APPROVED.
+     */
+    suspend fun getAssetRequestsForApproval(
+        status: String?,
+        kind: String
+    ): NetworkResult<List<com.siteflow.signature.cso.onboarding.data.dto.AssetRequestItemDto>, ApiError> {
+        return outletApi.getAssetRequests(status = status, kind = kind)
+            .map { it.data?.content ?: emptyList() }
+    }
+
+    /**
+     * Upload an asset compliance photo for an outlet: finds the outlet's request
+     * of [kind] awaiting compliance (EXECUTED / OVERDUE / NON_COMPLIANT) and posts it.
+     */
+    suspend fun uploadAssetCompliance(
+        outletId: String,
+        kind: String,
+        photoBytes: ByteArray
+    ): NetworkResult<Boolean, ApiError> {
+        val requestId: String? = when (
+            val res = outletApi.getAssetRequests(kind = kind, outletId = outletId)
+        ) {
+            is NetworkResult.Success -> res.data.data?.content?.firstOrNull {
+                it.status == "EXECUTED" || it.status == "COMPLIANCE_OVERDUE" || it.status == "NON_COMPLIANT"
+            }?.id
+            is NetworkResult.Error -> return NetworkResult.Error(res.error)
+        }
+        if (requestId == null) {
+            return NetworkResult.Error(ApiError(-1, "No $kind asset awaiting compliance for this outlet"))
+        }
+        return outletApi.uploadCompliancePhoto(requestId, photoBytes).map { resp ->
+            if (resp.success) true else throw Exception(resp.error ?: "Compliance upload failed")
+        }
+    }
+
+    /**
+     * The outlet's current (non-terminal) request of [kind], for showing the
+     * approval/action on the outlet detail. Null if none / only rejected.
+     */
+    suspend fun getOutletAssetRequest(
+        outletId: String,
+        kind: String
+    ): NetworkResult<com.siteflow.signature.cso.onboarding.data.dto.AssetRequestItemDto?, ApiError> {
+        return outletApi.getAssetRequests(kind = kind, outletId = outletId).map { resp ->
+            resp.data?.content?.firstOrNull { it.status != null && it.status != "REJECTED" }
+        }
+    }
+
+    /** Approve/reject an asset request via POST /asset-requests/{id}/decision. */
+    suspend fun decideAssetRequest(
+        requestId: String,
+        action: String,
+        reason: String?
+    ): NetworkResult<Boolean, ApiError> {
+        return outletApi.decideAssetRequest(requestId, action, reason).map { response ->
+            if (response.success) true
+            else throw Exception(response.error ?: "Failed to $action cooler request")
         }
     }
 

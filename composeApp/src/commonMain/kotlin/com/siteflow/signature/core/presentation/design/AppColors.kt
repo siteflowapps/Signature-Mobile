@@ -72,5 +72,33 @@ object AppColors {
     val WalkthroughSurfaceCard = Color(0xFFEFF6FF)
     val WalkthroughSurfaceCardAlt = Color(0xFFE0E7FF)
 
+    // ── Signature Stepper — step state colours ──
+    val StepDone       = Color(0xFF16A34A)   // green-600
+    val StepDoneBg     = Color(0xFFDCFCE7)   // green-100
+    val StepActive     = Color(0xFF2563EB)   // blue-600
+    val StepActiveBg   = Color(0xFFEFF6FF)   // blue-50
+    val StepPending    = Color(0xFF9CA3AF)   // gray-400
+    val StepPendingBg  = Color(0xFFF3F4F6)   // gray-100
+    val StepRejected   = Color(0xFFDC2626)   // red-600
+    val StepRejectedBg = Color(0xFFFEF2F2)   // red-50
+    val StepLine       = Color(0xFFE5E7EB)   // gray-200
+
+    // ── Asset request stage chip colours ──
+    val AssetPending    = Color(0xFFF59E0B)  // amber — raised / L1 pending
+    val AssetPendingBg  = Color(0xFFFEF3C7)
+    val AssetApproved   = Color(0xFF2563EB)  // blue  — L2 approved / in progress
+    val AssetApprovedBg = Color(0xFFDBEAFE)
+    val AssetExecuted   = Color(0xFF7C3AED)  // purple — installed, awaiting compliance
+    val AssetExecutedBg = Color(0xFFF3E8FF)
+    val AssetCompliant  = Color(0xFF16A34A)  // green — fully compliant
+    val AssetCompliantBg= Color(0xFFDCFCE7)
+    val AssetOverdue    = Color(0xFFDC2626)  // red — overdue / non-compliant
+    val AssetOverdueBg  = Color(0xFFFEE2E2)
+
+    // ── Next-action card backgrounds ──
+    val CtaAmberBg  = Color(0xFFFFFBEB)
+    val CtaBlueBg   = Color(0xFFEFF6FF)
+    val CtaGreenBg  = Color(0xFFF0FDF4)
+    val CtaRedBg    = Color(0xFFFFF1F2)
 
 }

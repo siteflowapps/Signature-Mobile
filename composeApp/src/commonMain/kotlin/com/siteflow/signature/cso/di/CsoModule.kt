@@ -14,6 +14,8 @@ import com.siteflow.signature.cso.profile.data.UserApi
 import com.siteflow.signature.cso.profile.data.UserRepository
 import com.siteflow.signature.cso.profile.domain.MyAsesViewModel
 import com.siteflow.signature.cso.profile.domain.ProfileViewModel
+import com.siteflow.signature.asset.approvals.domain.AssetApprovalViewModel
+import com.siteflow.signature.asset.approvals.domain.OutletAssetViewModel
 import org.koin.dsl.module
 
 val csoModule = module {
@@ -31,4 +33,6 @@ val csoModule = module {
     factory { MyAsesViewModel(get(), get()) }
     single { InvoiceViewModel(get(), get()) }
     single { ProfileViewModel(get(), get(), get(), get()) }
+    factory { AssetApprovalViewModel(get(), get()) }
+    factory { OutletAssetViewModel(get(), get()) }
 }

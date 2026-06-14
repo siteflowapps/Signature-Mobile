@@ -98,21 +98,31 @@ class InvoiceViewModel(
     }
 
     private fun loadInvoiceDetail(invoiceId: String) {
-        val invoice = state.value.invoices.firstOrNull { it.id == invoiceId }
+        val cached = state.value.invoices.firstOrNull { it.id == invoiceId }
 
         val allInvoices = state.value.invoices
-        val periodInvoices = if (invoice != null) {
+        val periodInvoices = if (cached != null) {
             allInvoices.filter {
-                it.outletName == invoice.outletName && it.invoicePeriod == invoice.invoicePeriod
+                it.outletName == cached.outletName && it.invoicePeriod == cached.invoicePeriod
             }
         } else emptyList()
 
-        updateState { it.copy(selectedInvoice = invoice, periodInvoices = periodInvoices) }
-        if (invoice != null) {
+        // Instant paint from the list, then refresh with GET /invoices/{id}.
+        updateState { it.copy(selectedInvoice = cached, periodInvoices = periodInvoices) }
+        scope.launch {
+            invoiceApi.getInvoiceDetail(invoiceId)
+                .onSuccess { resp ->
+                    resp.data?.toInvoiceItem()?.let { fresh ->
+                        updateState { it.copy(selectedInvoice = fresh) }
+                    }
+                }
+                .onError { /* keep cached item on failure */ }
+        }
+        if (cached != null) {
             analytics.track(AnalyticsEvent.ASEEvent.InvoiceDetailViewed(
                 invoiceId = invoiceId,
-                invoiceStatus = invoice.status.name,
-                outletName = invoice.outletName
+                invoiceStatus = cached.status.name,
+                outletName = cached.outletName
             ))
         }
     }

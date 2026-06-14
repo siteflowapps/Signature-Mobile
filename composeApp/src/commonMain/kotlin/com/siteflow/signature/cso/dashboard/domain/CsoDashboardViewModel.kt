@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * Server-side compliance filter for the CSO "to request" pills. NONE = normal
+ * list; the others ask the backend for outlets whose asset is NOT_REQUESTED.
+ */
+enum class AssetComplianceFilter { NONE, COOLER_NOT_REQUESTED, BRANDING_NOT_REQUESTED }
+
 data class CsoDashboardState(
     val outlets: List<OutletItem> = emptyList(),
     val isLoading: Boolean = false,
@@ -22,7 +28,12 @@ data class CsoDashboardState(
     val currentPage: Int = 0,
     val totalPages: Int = 0,
     val totalElements: Int = 0,
-    val isLastPage: Boolean = true
+    val isLastPage: Boolean = true,
+    /** Active server-side compliance pill. */
+    val assetFilter: AssetComplianceFilter = AssetComplianceFilter.NONE,
+    /** Counts for the "to request" pills (NOT_REQUESTED, team-scoped). */
+    val coolerToRequestCount: Int = 0,
+    val brandingToRequestCount: Int = 0
 )
 
 class CsoDashboardViewModel(
@@ -33,20 +44,55 @@ class CsoDashboardViewModel(
 
     companion object {
         private const val PAGE_SIZE = 20
+
+        /**
+         * Gates the CSO "to request" compliance pills. Keep false until the
+         * backend honors coolerComplianceStatus/marketingComplianceStatus on
+         * GET /outlets — otherwise the counts would equal the full outlet list.
+         */
+        const val ASSET_FILTERS_ENABLED = false
     }
 
     private val _state = MutableStateFlow(CsoDashboardState())
     val state = _state.asStateFlow()
 
+    /** Query params for the active compliance pill. */
+    private fun complianceParams(): Pair<String?, String?> = when (_state.value.assetFilter) {
+        AssetComplianceFilter.COOLER_NOT_REQUESTED -> "NOT_REQUESTED" to null
+        AssetComplianceFilter.BRANDING_NOT_REQUESTED -> null to "NOT_REQUESTED"
+        AssetComplianceFilter.NONE -> null to null
+    }
+
     init {
         loadOutlets()
+    }
+
+    /** Switch the server-side compliance pill and reload from page 0. */
+    fun setAssetFilter(filter: AssetComplianceFilter) {
+        if (_state.value.assetFilter == filter) return
+        _state.update { it.copy(assetFilter = filter) }
+        loadOutlets()
+    }
+
+    private fun refreshComplianceCounts() {
+        if (!ASSET_FILTERS_ENABLED) return
+        scope.launch {
+            outletRepository.countOutletsByCompliance("COOLER", "NOT_REQUESTED")
+                .onSuccess { c -> _state.update { it.copy(coolerToRequestCount = c) } }
+            outletRepository.countOutletsByCompliance("MARKETING", "NOT_REQUESTED")
+                .onSuccess { c -> _state.update { it.copy(brandingToRequestCount = c) } }
+        }
     }
 
     fun loadOutlets() {
         scope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            outletRepository.getOutlets(page = 0, size = PAGE_SIZE, showLoader = false)
+            val (cooler, marketing) = complianceParams()
+            outletRepository.getOutlets(
+                page = 0, size = PAGE_SIZE, showLoader = false,
+                coolerComplianceStatus = cooler, marketingComplianceStatus = marketing
+            )
                 .onSuccess { page ->
                     val items = page.content.map { OutletItem.fromDto(it) }
                         .sortedByDescending { it.updatedAtRaw }
@@ -70,6 +116,7 @@ class CsoDashboardViewModel(
                     analytics.track(AnalyticsEvent.ASEEvent.OutletListViewed(
                         outletCount = page.totalElements
                     ))
+                    refreshComplianceCounts()
                 }
                 .onError { error ->
                     _state.update {
@@ -91,7 +138,11 @@ class CsoDashboardViewModel(
             _state.update { it.copy(isLoadingMore = true) }
 
             val nextPage = current.currentPage + 1
-            outletRepository.getOutlets(page = nextPage, size = PAGE_SIZE, showLoader = false)
+            val (cooler, marketing) = complianceParams()
+            outletRepository.getOutlets(
+                page = nextPage, size = PAGE_SIZE, showLoader = false,
+                coolerComplianceStatus = cooler, marketingComplianceStatus = marketing
+            )
                 .onSuccess { page ->
                     val newItems = page.content.map { OutletItem.fromDto(it) }
                     // Ensure loading indicator is visible for at least 300ms

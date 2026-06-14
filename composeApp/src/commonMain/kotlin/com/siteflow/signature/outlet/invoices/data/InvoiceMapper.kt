@@ -10,6 +10,46 @@ import com.siteflow.signature.cso.invoices.data.InvoiceStatus
 import com.siteflow.signature.cso.invoices.data.SlabQualification
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.outlet.dashboard.data.OutletRecentInvoice
+import com.siteflow.signature.shared.data.ApprovalLevel
+import com.siteflow.signature.shared.data.ApprovalStep
+import com.siteflow.signature.shared.data.ApprovalStepStatus
+
+/**
+ * Builds the multi-level approval timeline (ASE → ASM → Finance) from the
+ * invoice detail's eventLog. Empty for list items (no eventLog).
+ */
+fun buildTimelineFromEventLog(events: List<InvoiceEventLogDto>): List<ApprovalStep> {
+    if (events.isEmpty()) return emptyList()
+
+    fun step(level: ApprovalLevel, approvedStatus: String, rejectRole: String): ApprovalStep {
+        val approved = events.firstOrNull { it.toStatus == approvedStatus }
+        val rejected = events.firstOrNull {
+            it.toStatus == "REJECTED" && (it.performedByRole ?: "").uppercase().contains(rejectRole)
+        }
+        return when {
+            approved != null -> ApprovalStep(
+                level = level,
+                approverName = approved.performedByName,
+                status = ApprovalStepStatus.APPROVED,
+                timestamp = approved.eventTime?.substringBefore("T"),
+                note = approved.remarks
+            )
+            rejected != null -> ApprovalStep(
+                level = level,
+                approverName = rejected.performedByName,
+                status = ApprovalStepStatus.REJECTED,
+                timestamp = rejected.eventTime?.substringBefore("T"),
+                note = rejected.remarks
+            )
+            else -> ApprovalStep(level = level, status = ApprovalStepStatus.NOT_STARTED)
+        }
+    }
+    return listOf(
+        step(ApprovalLevel.L1_ASE, "ASE_APPROVED", "ASE"),
+        step(ApprovalLevel.L2_ASM, "ASM_APPROVED", "ASM"),
+        step(ApprovalLevel.L3_FINANCE, "FINANCE_APPROVED", "FINANCE")
+    )
+}
 
 /**
  * Maps API status string to the InvoiceStatus enum.
@@ -70,7 +110,8 @@ fun InvoiceDto.toInvoiceItem(): InvoiceItem {
         invoiceNumber = invoiceNumber ?: "",
         distributorName = distributorName ?: "",
         totalQuantity = quantity ?: 0.0,
-        submittedByAse = ""
+        submittedByAse = createdByName ?: "",
+        approvalTimeline = buildTimelineFromEventLog(eventLog)
     )
 }
 

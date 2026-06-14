@@ -58,6 +58,8 @@ data class OutletResponseData(
     val outletStatus: String? = null,
     val operationalStatus: String? = null,
     val assetStatus: String? = null,
+    val coolerComplianceStatus: String? = null,
+    val marketingComplianceStatus: String? = null,
     val complianceState: String? = null,
     val complianceId: String? = null,
     val relaxationEndDate: String? = null,

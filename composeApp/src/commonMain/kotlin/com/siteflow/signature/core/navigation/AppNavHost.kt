@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.siteflow.signature.cso.compliance.presentation.ComplianceScreen
 import com.siteflow.signature.ase.approvals.presentation.AseOutletReviewScreen
+import com.siteflow.signature.asset.approvals.presentation.AssetRequestQueueScreen
 import com.siteflow.signature.cso.dashboard.presentation.CsoHomeScreen
 import com.siteflow.signature.cso.dashboard.presentation.AsmHomeScreen
 import com.siteflow.signature.cso.dashboard.presentation.CsoDashboardScreen
@@ -358,6 +359,16 @@ fun AppNavHost(
                     onBack = { navController.popBackStack() }
                 )
 
+                AppDestination.CoolerRequests.route -> InvoiceDetailTopAppBar(
+                    title = "Cooler Requests",
+                    onBack = { navController.popBackStack() }
+                )
+
+                AppDestination.BrandingRequests.route -> InvoiceDetailTopAppBar(
+                    title = "Branding Requests",
+                    onBack = { navController.popBackStack() }
+                )
+
                 AppDestination.RaiseTicket.route -> InvoiceDetailTopAppBar(
                     title = "Raise an Issue",
                     onBack = { navController.popBackStack() }
@@ -537,7 +548,11 @@ fun AppNavHost(
                             launchSingleTop = true
                             restoreState = false
                         }
-                    }
+                    },
+                    // ASE acts as L1 approver of asset requests; CSO only raises them.
+                    showCoolerApprovals = currentRole == UserRole.ASE,
+                    onCoolerRequests = { navController.navigate(AppDestination.CoolerRequests.route) },
+                    onBrandingRequests = { navController.navigate(AppDestination.BrandingRequests.route) }
                 )
             }
 
@@ -995,6 +1010,37 @@ fun AppNavHost(
                 )
             }
 
+            /* ---------------- ASSET REQUEST FINDERS (ASE L1 / ASM L2) ---------------- */
+            composable(AppDestination.CoolerRequests.route) {
+                AssetRequestQueueScreen(
+                    kind = "COOLER",
+                    onOpenOutlet = { outletId, outletName ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("outletId", outletId)
+                        navController.currentBackStackEntry?.savedStateHandle?.set("outletName", outletName)
+                        // Open the outlet review where the asset approve/reject lives.
+                        val dest = when (currentRole) {
+                            UserRole.ASM -> AppDestination.AsmOutletReview.route
+                            else -> AppDestination.AseOutletReview.route
+                        }
+                        navController.navigate(dest)
+                    }
+                )
+            }
+            composable(AppDestination.BrandingRequests.route) {
+                AssetRequestQueueScreen(
+                    kind = "MARKETING",
+                    onOpenOutlet = { outletId, outletName ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("outletId", outletId)
+                        navController.currentBackStackEntry?.savedStateHandle?.set("outletName", outletName)
+                        val dest = when (currentRole) {
+                            UserRole.ASM -> AppDestination.AsmOutletReview.route
+                            else -> AppDestination.AseOutletReview.route
+                        }
+                        navController.navigate(dest)
+                    }
+                )
+            }
+
             /* ---------------- ASE (L1 APPROVER) ---------------- */
             composable(AppDestination.AseOutletReview.route) {
                 val outletId = navController.previousBackStackEntry
@@ -1040,7 +1086,9 @@ fun AppNavHost(
                     },
                     onNavigateToMyAses = {
                         navController.navigate(AppDestination.AsmMyTeam.route)
-                    }
+                    },
+                    onCoolerRequests = { navController.navigate(AppDestination.CoolerRequests.route) },
+                    onBrandingRequests = { navController.navigate(AppDestination.BrandingRequests.route) }
                 )
             }
 

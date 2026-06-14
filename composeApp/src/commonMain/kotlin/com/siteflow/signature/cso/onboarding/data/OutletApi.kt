@@ -1,6 +1,10 @@
 package com.siteflow.signature.cso.onboarding.data
 
-import com.siteflow.signature.cso.onboarding.data.dto.AssetRequestDto
+import com.siteflow.signature.cso.onboarding.data.dto.AssetDecisionDto
+import com.siteflow.signature.cso.onboarding.data.dto.AssetRequestItemDto
+import com.siteflow.signature.cso.onboarding.data.dto.AssetRequestListResponseDto
+import com.siteflow.signature.cso.onboarding.data.dto.AssetRequestResponseDto
+import com.siteflow.signature.cso.onboarding.data.dto.CreateAssetRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.BusinessDetailsRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.CreateOutletRequestDto
 import com.siteflow.signature.cso.onboarding.data.dto.CreateOutletResponseDto
@@ -71,7 +75,9 @@ class OutletApi(
     suspend fun getOutlets(
         page: Int,
         size: Int,
-        showLoader: Boolean = true
+        showLoader: Boolean = true,
+        coolerComplianceStatus: String? = null,
+        marketingComplianceStatus: String? = null
     ): NetworkResult<OutletListResponseDto, ApiError> {
         return safeRequest<OutletListResponseDto>(
             showLoader = showLoader,
@@ -79,6 +85,8 @@ class OutletApi(
                 client.get(NetworkConfig.v1("outlets")) {
                     parameter("page", page)
                     parameter("size", size)
+                    if (coolerComplianceStatus != null) parameter("coolerComplianceStatus", coolerComplianceStatus)
+                    if (marketingComplianceStatus != null) parameter("marketingComplianceStatus", marketingComplianceStatus)
                 }
             }
         )
@@ -302,22 +310,89 @@ class OutletApi(
     }
 
     /**
-     * POST /outlets/{outletId}/request-asset
-     * ASE requests an asset (cooler/branding) for an approved outlet.
+     * POST /asset-requests
+     * CSO raises a cooler/branding asset request for an ACTIVE outlet.
+     * Body: CreateAssetRequestDto (outletId in the body).
      */
-    suspend fun requestAsset(
-        outletId: String,
-        request: AssetRequestDto
-    ): NetworkResult<CreateOutletResponseDto, ApiError> {
-        return safeRequest<CreateOutletResponseDto>(
+    suspend fun createAssetRequest(
+        request: CreateAssetRequestDto
+    ): NetworkResult<AssetRequestResponseDto, ApiError> {
+        return safeRequest<AssetRequestResponseDto>(
             block = {
-                client.post(NetworkConfig.v1("outlets/$outletId/request-asset")) {
+                client.post(NetworkConfig.v1("asset-requests")) {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
             }
         )
     }
+
+    /**
+     * GET /asset-requests?status=&kind= — team-scoped asset request queue
+     * (used by ASE/ASM to see pending cooler requests for approval).
+     */
+    suspend fun getAssetRequests(
+        status: String? = null,
+        kind: String? = null,
+        outletId: String? = null
+    ): NetworkResult<AssetRequestListResponseDto, ApiError> {
+        return safeRequest<AssetRequestListResponseDto>(
+            block = {
+                client.get(NetworkConfig.v1("asset-requests")) {
+                    if (status != null) parameter("status", status)
+                    if (kind != null) parameter("kind", kind)
+                    if (outletId != null) parameter("outletId", outletId)
+                    parameter("size", 100)
+                }
+            }
+        )
+    }
+
+    /**
+     * POST /asset-requests/{id}/compliance-photo — CSO/ASE upload a cooler
+     * compliance photo (multipart "photo"). Allowed once the request is EXECUTED.
+     */
+    suspend fun uploadCompliancePhoto(
+        requestId: String,
+        photoBytes: ByteArray
+    ): NetworkResult<AssetRequestResponseDto, ApiError> {
+        return safeRequest<AssetRequestResponseDto>(
+            block = {
+                client.post(NetworkConfig.v1("asset-requests/$requestId/compliance-photo")) {
+                    setBody(MultiPartFormDataContent(formData {
+                        append(
+                            "photo",
+                            photoBytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentDisposition, "filename=compliance.jpg")
+                                append(HttpHeaders.ContentType, "image/jpeg")
+                            }
+                        )
+                    }))
+                }
+            }
+        )
+    }
+
+    /**
+     * POST /asset-requests/{id}/decision — ASE L1 / ASM L2 approve or reject.
+     * Body: { "action": "APPROVE" | "REJECT", "reason": "..." }
+     */
+    suspend fun decideAssetRequest(
+        requestId: String,
+        action: String,
+        reason: String? = null
+    ): NetworkResult<AssetRequestResponseDto, ApiError> {
+        return safeRequest<AssetRequestResponseDto>(
+            block = {
+                client.post(NetworkConfig.v1("asset-requests/$requestId/decision")) {
+                    contentType(ContentType.Application.Json)
+                    setBody(AssetDecisionDto(action = action, reason = reason))
+                }
+            }
+        )
+    }
+
 
     /**
      * POST /outlets/{outletId}/compliance   multipart

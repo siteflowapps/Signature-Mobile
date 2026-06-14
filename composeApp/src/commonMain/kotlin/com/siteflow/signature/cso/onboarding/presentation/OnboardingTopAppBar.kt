@@ -2,7 +2,6 @@ package com.siteflow.signature.cso.onboarding.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
@@ -16,18 +15,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.siteflow.signature.core.presentation.components.OnboardingStepIndicator
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 
 /**
  * Centralized top app bar for the Onboarding flow.
- * SiteFlow pattern: back arrow + title + step progress bar + divider.
+ *
+ * Replaces the old hard-coded 3-bar progress with a proper 6-step dot stepper
+ * that matches the real onboarding flow:
+ *   1 Basic Info · 2 Economics · 3 Distributor & Bank · 4 KYC · 5 Photos · 6 Agreement
  */
 @Composable
 fun OnboardingTopAppBar(
     currentStep: Int = 1,
-    totalSteps: Int = 3,
-    stepLabel: String = "Basic Details",
+    totalSteps: Int = 6,
+    stepLabel: String = "Basic Info",   // kept for API compatibility (unused — derived from step)
     onBack: () -> Unit
 ) {
     Column(
@@ -36,7 +39,7 @@ fun OnboardingTopAppBar(
             .background(Color.White)
             .statusBarsPadding()
     ) {
-        // Title row
+        // ── Title row ──
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 8.dp, end = 16.dp)
@@ -45,64 +48,29 @@ fun OnboardingTopAppBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color(0xFF111827)
+                    tint = AppColors.black27
                 )
             }
             Text(
                 text = "New Outlet Onboarding",
-                fontSize = 20.sp,
-                style = AppTypography.TitleMedium,
-                color = Color(0xFF111827)
+                fontSize = 18.sp,
+                style = AppTypography.TitleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = AppColors.black27
             )
         }
 
-        // Step progress bar
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                for (i in 1..totalSteps) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .background(
-                                color = if (i <= currentStep) AppColors.BlueGradientStart
-                                else Color(0xFFE5E7EB),
-                                shape = RoundedCornerShape(2.dp)
-                            )
-                    )
-                }
-            }
+        // ── 6-step progress indicator ──
+        OnboardingStepIndicator(
+            currentStep = currentStep,
+            totalSteps = totalSteps,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
 
-            Spacer(Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Step $currentStep of $totalSteps",
-                    style = AppTypography.Caption.copy(fontSize = 12.sp),
-                    color = AppColors.TextTertiary
-                )
-                Text(
-                    text = stepLabel,
-                    style = AppTypography.Caption.copy(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = AppColors.BlueGradientStart
-                )
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(14.dp))
 
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFE5E7EB),
+            color = AppColors.Divider,
             thickness = 1.dp
         )
     }

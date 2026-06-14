@@ -24,6 +24,10 @@ sealed class AppDestination(val route: String) {
     // ASE (Area Sales Executive) — L1 approver
     object AseOutletReview : AppDestination("ase/outlet-review")
 
+    // Asset request approval queues (ASE L1, ASM L2)
+    object CoolerRequests : AppDestination("asset/cooler-requests")
+    object BrandingRequests : AppDestination("asset/branding-requests")
+
     // Outlet
     object OutletDashboard : AppDestination("outlet/dashboard")
     object OutletInvoices : AppDestination("outlet/invoices")

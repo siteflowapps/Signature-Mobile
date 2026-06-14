@@ -20,7 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.siteflow.signature.cso.dashboard.data.OutletItem
+import com.siteflow.signature.cso.dashboard.domain.AssetComplianceFilter
 import com.siteflow.signature.cso.dashboard.domain.CsoDashboardViewModel
+import com.siteflow.signature.core.domain.RoleManager
+import com.siteflow.signature.core.domain.UserRole
+import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.components.SignatureFilterChipRow
 import com.siteflow.signature.core.presentation.components.SignatureListHeader
 import com.siteflow.signature.core.presentation.components.SignatureTextField
@@ -109,6 +113,36 @@ fun CsoDashboardScreen(
                         viewModel.trackOutletFilterSelected(filter)
                     }
                 )
+            }
+
+            // CSO "to request" pills — server-side compliance filter (cooler / branding).
+            if (CsoDashboardViewModel.ASSET_FILTERS_ENABLED &&
+                RoleManager.currentRole.value == UserRole.CSO) {
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AssetRequestPill(
+                        label = "Cooler to request",
+                        count = dashboardState.coolerToRequestCount,
+                        selected = dashboardState.assetFilter == AssetComplianceFilter.COOLER_NOT_REQUESTED,
+                        onClick = {
+                            viewModel.setAssetFilter(
+                                if (dashboardState.assetFilter == AssetComplianceFilter.COOLER_NOT_REQUESTED)
+                                    AssetComplianceFilter.NONE else AssetComplianceFilter.COOLER_NOT_REQUESTED
+                            )
+                        }
+                    )
+                    AssetRequestPill(
+                        label = "Branding to request",
+                        count = dashboardState.brandingToRequestCount,
+                        selected = dashboardState.assetFilter == AssetComplianceFilter.BRANDING_NOT_REQUESTED,
+                        onClick = {
+                            viewModel.setAssetFilter(
+                                if (dashboardState.assetFilter == AssetComplianceFilter.BRANDING_NOT_REQUESTED)
+                                    AssetComplianceFilter.NONE else AssetComplianceFilter.BRANDING_NOT_REQUESTED
+                            )
+                        }
+                    )
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -227,4 +261,23 @@ fun CsoDashboardScreen(
             }
         }
     }
+}
+
+/** A server-backed "to request" pill with a count badge (cooler / branding). */
+@Composable
+private fun AssetRequestPill(
+    label: String,
+    count: Int,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(if (count > 0) "$label ($count)" else label) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AppColors.BlueGradientStart,
+            selectedLabelColor = Color.White
+        )
+    )
 }

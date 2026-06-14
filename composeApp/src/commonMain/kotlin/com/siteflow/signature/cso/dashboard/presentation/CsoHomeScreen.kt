@@ -40,6 +40,9 @@ import org.koin.compose.koinInject
 @Composable
 fun CsoHomeScreen(
     onNavigateToOutlets: (filter: String) -> Unit = {},
+    onCoolerRequests: () -> Unit = {},
+    onBrandingRequests: () -> Unit = {},
+    showCoolerApprovals: Boolean = false,
     viewModel: CsoHomeViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
@@ -94,6 +97,22 @@ fun CsoHomeScreen(
                 onAsmPending = { viewModel.onAction(CsoHomeAction.AsmPendingOutletsClicked) }
             )
 
+            // ── Asset request approval entries (ASE only) ──
+            if (showCoolerApprovals) {
+                Spacer(Modifier.height(16.dp))
+                ApprovalEntryCard(
+                    title = "Cooler Requests",
+                    subtitle = "Review pending cooler requests for approval",
+                    onClick = onCoolerRequests
+                )
+                Spacer(Modifier.height(12.dp))
+                ApprovalEntryCard(
+                    title = "Branding Requests",
+                    subtitle = "Review pending branding requests for approval",
+                    onClick = onBrandingRequests
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
 
             // ── Slab Data Section ──
@@ -114,6 +133,39 @@ fun CsoHomeScreen(
         }
 
         Spacer(Modifier.height(80.dp))
+    }
+}
+
+/** Reusable tappable entry card for an approval queue (cooler / branding). */
+@Composable
+fun ApprovalEntryCard(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick)
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = AppTypography.TitleMedium.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                    color = AppColors.TextPrimary
+                )
+                Text(
+                    text = subtitle,
+                    style = AppTypography.Caption,
+                    color = AppColors.TextSecondary
+                )
+            }
+            Text("→", style = AppTypography.TitleLarge.copy(fontSize = 20.sp), color = AppColors.TextTertiary)
+        }
     }
 }
 

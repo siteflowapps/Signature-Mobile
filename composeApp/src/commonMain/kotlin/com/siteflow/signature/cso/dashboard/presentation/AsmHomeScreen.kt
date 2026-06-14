@@ -42,6 +42,8 @@ fun AsmHomeScreen(
     onNavigateToOutlets: (filter: String) -> Unit = {},
     onNavigateToInvoices: (filter: String) -> Unit = {},
     onNavigateToMyAses: () -> Unit = {},
+    onCoolerRequests: () -> Unit = {},
+    onBrandingRequests: () -> Unit = {},
     viewModel: AsmHomeViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
@@ -101,6 +103,21 @@ fun AsmHomeScreen(
                 onInProgress = { viewModel.onAction(AsmHomeAction.InProgressOutletsClicked) },
                 onAsmPending = { viewModel.onAction(AsmHomeAction.AsmPendingOutletsClicked) },
                 onPendingInvoices = { viewModel.onAction(AsmHomeAction.PendingInvoicesClicked) }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // ── Asset request approval entries (ASM L2) ──
+            ApprovalEntryCard(
+                title = "Cooler Requests",
+                subtitle = "Review cooler requests awaiting L2 approval",
+                onClick = onCoolerRequests
+            )
+            Spacer(Modifier.height(12.dp))
+            ApprovalEntryCard(
+                title = "Branding Requests",
+                subtitle = "Review branding requests awaiting L2 approval",
+                onClick = onBrandingRequests
             )
 
             Spacer(Modifier.height(24.dp))

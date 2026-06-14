@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.siteflow.signature.ase.approvals.domain.AseApprovalAction
 import com.siteflow.signature.ase.approvals.domain.AseApprovalEvent
 import com.siteflow.signature.ase.approvals.domain.AseApprovalViewModel
+import com.siteflow.signature.asset.approvals.presentation.AssetCard
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import com.siteflow.signature.cso.dashboard.presentation.DistributorDetailsCard
@@ -98,6 +99,9 @@ fun AseOutletReviewScreen(
             ) {
                 OutletInfoCard(outlet)
                 SignaturePipelineCard(outlet)
+                // Asset approvals (each shown only when a request of that kind exists)
+                AssetCard(outlet = outlet, kind = "COOLER")
+                AssetCard(outlet = outlet, kind = "MARKETING")
                 OutletDetailsCard(outlet)
                 DistributorDetailsCard(outlet)
                 PaymentModeCard(outlet)

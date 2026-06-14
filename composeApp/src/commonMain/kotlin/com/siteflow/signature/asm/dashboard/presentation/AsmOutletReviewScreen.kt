@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.collectLatest
 import com.siteflow.signature.cso.dashboard.data.SignatureStep
 import com.siteflow.signature.cso.dashboard.data.ComplianceRecord
 import com.siteflow.signature.cso.dashboard.data.ComplianceState
+import com.siteflow.signature.asset.approvals.presentation.AssetCard
 import com.siteflow.signature.cso.dashboard.data.OutletItem
 import com.siteflow.signature.cso.dashboard.data.OutletStatus
 
@@ -144,6 +145,10 @@ fun AsmOutletReviewScreen(
 
                 // ── Signature Pipeline ──
                 SignaturePipelineCard(outlet)
+
+                // ── Asset approvals (each shown only when a request of that kind exists) ──
+                AssetCard(outlet = outlet, kind = "COOLER")
+                AssetCard(outlet = outlet, kind = "MARKETING")
 
                 // ── Submission Timeline ──
                 if (outlet.timeline.isNotEmpty()) {
