@@ -40,7 +40,7 @@ import com.siteflow.signature.cso.dashboard.data.OutletItem
 import com.siteflow.signature.cso.dashboard.data.OutletStatus
 import com.siteflow.signature.cso.dashboard.data.TimelineEntry
 import com.siteflow.signature.cso.onboarding.data.PhotoSlot
-import com.siteflow.signature.core.presentation.components.HorizontalSignatureStepper
+import com.siteflow.signature.core.presentation.components.VerticalSignatureTimeline
 import com.siteflow.signature.core.presentation.components.StepState
 import com.siteflow.signature.core.presentation.components.StepperItem
 import com.siteflow.signature.core.presentation.design.AppColors
@@ -191,6 +191,19 @@ fun SignaturePipelineCard(outlet: OutletItem) {
                 isRejected -> StepState.REJECTED
                 isActive   -> StepState.ACTIVE
                 else       -> StepState.PENDING
+            },
+            caption = when {
+                isDone     -> "Completed"
+                isRejected -> if (step == SignatureStep.ASE_APPROVAL) "Rejected by ASE"
+                              else "Rejected by ASM"
+                isActive   -> when (step) {
+                    SignatureStep.ENROLLMENT             -> "In progress"
+                    SignatureStep.ASE_APPROVAL           -> "Awaiting L1 review"
+                    SignatureStep.ASM_APPROVAL           -> "Awaiting L2 approval"
+                    SignatureStep.ASSET_REQUEST          -> "Action needed"
+                    SignatureStep.SIGNATURE_VERIFICATION -> "Awaiting verification"
+                }
+                else       -> "Pending"
             }
         )
     }
@@ -199,9 +212,8 @@ fun SignaturePipelineCard(outlet: OutletItem) {
         title    = "Signature Journey",
         trailing = "${outlet.completedSteps.size}/${SignatureStep.entries.size} done"
     ) {
-        HorizontalSignatureStepper(
+        VerticalSignatureTimeline(
             steps    = steps,
-            dotSize  = 28.dp,
             modifier = Modifier.fillMaxWidth()
         )
 

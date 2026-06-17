@@ -25,15 +25,15 @@ data class BusinessDetailsRequestDto(
     val bankName: String,
     val branch: String? = null,
 
-    /** "FIXED" or "DYNAMIC" */
+    /** Always "DYNAMIC" — volume-based slab payout. Kept because the backend requires it (@NotNull). */
     val payoutType: String,
 
     /** Backend classification label e.g. "GOLD", "SILVER" — mirrors [classification] for payout endpoint. */
     val slabClassification: String? = null,
 
-    /** Required for FIXED payout: committed cases/month. Null for DYNAMIC. */
+    /** No longer collected in the UI — hardcoded on submit. */
     val monthlyVolumeCommitment: Int? = null,
 
-    /** Required for FIXED payout: fixed ₹ amount/month. Null for DYNAMIC. */
+    /** No longer collected in the UI — hardcoded on submit. */
     val monthlyPayoutAmount: Int? = null
 )

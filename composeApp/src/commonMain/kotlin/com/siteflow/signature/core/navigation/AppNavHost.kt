@@ -389,7 +389,7 @@ fun AppNavHost(
                 AppDestination.CsoOnboardStep2.route -> OnboardingTopAppBar(
                     currentStep = 2,
                     totalSteps = 6,
-                    stepLabel = "Classification & Volume",
+                    stepLabel = "Outlet Economics",
                     onBack = { navController.popBackStack() }
                 )
 
@@ -425,7 +425,7 @@ fun AppNavHost(
 
         /* ---------------- FAB ---------------- */
         floatingActionButton = {
-            if (currentRoute == AppDestination.CsoDashboard.route) {
+            if (currentRoute == AppDestination.CsoDashboard.route && currentRole == UserRole.CSO) {
                 FloatingActionButton(
                     onClick = {
                         onboardingViewModel.onAction(OnboardingAction.ResetState)

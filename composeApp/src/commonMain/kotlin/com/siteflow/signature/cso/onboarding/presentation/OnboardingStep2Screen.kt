@@ -47,10 +47,10 @@ import com.siteflow.signature.cso.onboarding.domain.OnboardingAction
 import com.siteflow.signature.cso.onboarding.domain.OnboardingEvent
 import com.siteflow.signature.cso.onboarding.domain.OnboardingViewModel
 import com.siteflow.signature.cso.onboarding.domain.OnboardingValidator
-import com.siteflow.signature.cso.onboarding.domain.PayoutType
 import com.siteflow.signature.core.presentation.components.SignatureButton
 import com.siteflow.signature.core.presentation.components.SignatureTextField
 import com.siteflow.signature.core.presentation.components.dismissKeyboardOnTap
+import com.siteflow.signature.core.presentation.components.imeBottomPadding
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import kotlinx.coroutines.flow.collectLatest
@@ -85,6 +85,7 @@ fun OnboardingStep2Screen(
             .fillMaxSize()
             .background(Color(0xFFF9FAFB))
             .dismissKeyboardOnTap()
+            .imeBottomPadding()
     ) {
         // ── Content (scrollable) ──
         Column(
@@ -98,64 +99,49 @@ fun OnboardingStep2Screen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Payout Type Selector ──
-            PayoutTypeSelector(
-                selectedType = state.payoutType,
-                fixedMonthlyVolume = state.fixedMonthlyVolume,
-                fixedMonthlyAmount = state.fixedMonthlyAmount,
-                onTypeSelected = { viewModel.onAction(OnboardingAction.PayoutTypeSelected(it)) },
-                onVolumeChanged = { viewModel.onAction(OnboardingAction.FixedMonthlyVolumeChanged(it)) },
-                onAmountChanged = { viewModel.onAction(OnboardingAction.FixedMonthlyAmountChanged(it)) }
+            // Suggested Classification — payout is always volume-based (slab decided
+            // by actual sales). The slab is auto-selected from the API.
+            Text(
+                text = "Suggested Classification",
+                style = AppTypography.TitleMedium.copy(
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Color(0xFF374151)
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            ClassificationHeroCard(
+                classificationLabel = state.selectedClassification,
+                slabs = state.slabs
             )
 
             Spacer(Modifier.height(20.dp))
 
-            // Suggested Classification — only relevant for DYNAMIC (volume-based
-            // slab) payout. For FIXED the payout is set manually, so this is hidden
-            // and slabClassification is defaulted on submit.
-            if (state.payoutType == PayoutType.DYNAMIC) {
-                Text(
-                    text = "Suggested Classification",
-                    style = AppTypography.TitleMedium.copy(
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = Color(0xFF374151)
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                ClassificationHeroCard(
-                    classificationLabel = state.selectedClassification,
-                    slabs = state.slabs
-                )
-
-                Spacer(Modifier.height(20.dp))
-
-                // Classification Slabs (dynamic from API)
-                if (state.isSlabsLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp,
-                            color = AppColors.BlueGradientStart
-                        )
-                    }
-                } else if (state.slabs.isNotEmpty()) {
-                    DynamicSlabsList(
-                        slabs = state.slabs,
-                        selectedClassification = state.selectedClassification,
-                        onSlabSelected = { slabId ->
-                            viewModel.onAction(OnboardingAction.SlabSelected(slabId))
-                        }
+            // Classification Slabs (dynamic from API)
+            if (state.isSlabsLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = AppColors.BlueGradientStart
                     )
                 }
-
-                Spacer(Modifier.height(20.dp))
+            } else if (state.slabs.isNotEmpty()) {
+                DynamicSlabsList(
+                    slabs = state.slabs,
+                    selectedClassification = state.selectedClassification,
+                    onSlabSelected = { slabId ->
+                        viewModel.onAction(OnboardingAction.SlabSelected(slabId))
+                    }
+                )
             }
+
+            Spacer(Modifier.height(20.dp))
 
             // ── Outlet Economics ──
             Text(
@@ -202,7 +188,6 @@ fun OnboardingStep2Screen(
                 .fillMaxWidth()
                 .shadow(elevation = 4.dp)
                 .background(Color.White)
-                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             SignatureButton(
@@ -211,277 +196,6 @@ fun OnboardingStep2Screen(
                 enabled = OnboardingValidator.isStep2Valid(state) && !state.isLoading,
                 loading = state.isLoading
             )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Payout Type Selector
-// ═══════════════════════════════════════════════════════════════════
-
-@Composable
-private fun PayoutTypeSelector(
-    selectedType: PayoutType,
-    fixedMonthlyVolume: String,
-    fixedMonthlyAmount: String,
-    onTypeSelected: (PayoutType) -> Unit,
-    onVolumeChanged: (String) -> Unit,
-    onAmountChanged: (String) -> Unit
-) {
-    Column {
-        Text(
-            text = "Payout Type",
-            style = AppTypography.TitleMedium.copy(
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = Color(0xFF374151)
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // ── Dynamic Payout Card ──
-        PayoutOptionCard(
-            type = PayoutType.DYNAMIC,
-            isSelected = selectedType == PayoutType.DYNAMIC,
-            icon = Icons.Default.TrendingUp,
-            accentColor = Color(0xFF2563EB),
-            accentBg = Color(0xFFEFF6FF),
-            selectedBorder = Color(0xFF93C5FD),
-            selectedBg = Color(0xFFF0F6FF),
-            tagText = null,
-            tagBg = Color(0xFFDBEAFE),
-            tagColor = Color(0xFF1E40AF),
-            onClick = { onTypeSelected(PayoutType.DYNAMIC) }
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // ── Fixed Payout Card ──
-        PayoutOptionCard(
-            type = PayoutType.FIXED,
-            isSelected = selectedType == PayoutType.FIXED,
-            icon = Icons.Default.AccountBalance,
-            accentColor = Color(0xFF7C3AED),
-            accentBg = Color(0xFFF5F3FF),
-            selectedBorder = Color(0xFFC4B5FD),
-            selectedBg = Color(0xFFFAF5FF),
-            tagText = null,
-            tagBg = Color.Transparent,
-            tagColor = Color.Transparent,
-            onClick = { onTypeSelected(PayoutType.FIXED) }
-        )
-
-        // ── Fixed Payout Input Fields (animated) ──
-        AnimatedVisibility(
-            visible = selectedType == PayoutType.FIXED,
-            enter = expandVertically(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessMediumLow
-                )
-            ) + fadeIn(),
-            exit = shrinkVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMedium)
-            ) + fadeOut()
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Info hint
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = Color(0xFFF5F3FF),
-                                shape = RoundedCornerShape(10.dp)
-                            )
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = Color(0xFF7C3AED),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "Enter the monthly commitment details for this outlet's fixed payout agreement.",
-                            style = AppTypography.Caption.copy(
-                                fontSize = 13.sp,
-                                lineHeight = 18.sp
-                            ),
-                            color = Color(0xFF5B21B6)
-                        )
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Monthly Volume (Cases)
-                    SignatureTextField(
-                        value = fixedMonthlyVolume,
-                        onValueChange = onVolumeChanged,
-                        placeholder = "e.g. 50",
-                        label = "Monthly Volume Commitment",
-                        required = true,
-                        suffix = "cases",
-                        leadingIconVector = Icons.Default.Inventory2,
-                        keyboardType = KeyboardType.Number
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Monthly Amount (₹)
-                    SignatureTextField(
-                        value = fixedMonthlyAmount,
-                        onValueChange = onAmountChanged,
-                        placeholder = "e.g. 5000",
-                        label = "Monthly Payout Amount",
-                        required = true,
-                        prefix = "₹",
-                        leadingIconVector = Icons.Default.CurrencyRupee,
-                        keyboardType = KeyboardType.Number
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PayoutOptionCard(
-    type: PayoutType,
-    isSelected: Boolean,
-    icon: ImageVector,
-    accentColor: Color,
-    accentBg: Color,
-    selectedBorder: Color,
-    selectedBg: Color,
-    tagText: String?,
-    tagBg: Color,
-    tagColor: Color,
-    onClick: () -> Unit
-) {
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) selectedBorder else Color(0xFFE5E7EB),
-        animationSpec = spring(stiffness = Spring.StiffnessMedium)
-    )
-    val bgColor by animateColorAsState(
-        targetValue = if (isSelected) selectedBg else Color.White,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium)
-    )
-    val elevation by animateDpAsState(
-        targetValue = if (isSelected) 3.dp else 0.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium)
-    )
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation, RoundedCornerShape(14.dp))
-            .clip(RoundedCornerShape(14.dp))
-            .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = bgColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = androidx.compose.foundation.BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = borderColor
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Radio indicator
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .border(
-                        width = 2.dp,
-                        color = if (isSelected) accentColor else Color(0xFFD1D5DB),
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isSelected) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(accentColor, CircleShape)
-                    )
-                }
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(accentBg, RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = accentColor,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            // Text
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = type.label,
-                        style = AppTypography.TitleMedium.copy(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = if (isSelected) Color(0xFF111827) else Color(0xFF374151)
-                    )
-                    if (tagText != null) {
-                        Spacer(Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(tagBg, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = tagText,
-                                style = AppTypography.Caption.copy(
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.5.sp
-                                ),
-                                color = tagColor
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = type.description,
-                    style = AppTypography.Caption.copy(
-                        fontSize = 13.sp,
-                        lineHeight = 17.sp
-                    ),
-                    color = Color(0xFF6B7280)
-                )
-            }
         }
     }
 }
@@ -526,16 +240,6 @@ private fun PayoutInfoCard() {
                     iconTint = Color(0xFF2563EB),
                     title = "Volume-Based Slab",
                     subtitle = "Your payout tier is determined by your cumulative monthly case volume"
-                )
-
-                Spacer(Modifier.height(14.dp))
-
-                PayoutInfoRow(
-                    icon = Icons.Default.CurrencyRupee,
-                    iconBg = Color(0xFFF0FDF4),
-                    iconTint = Color(0xFF16A34A),
-                    title = "Fixed ₹ per Case",
-                    subtitle = "You earn a fixed rupee amount for every qualifying case delivered."
                 )
 
                 Spacer(Modifier.height(14.dp))

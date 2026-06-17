@@ -31,6 +31,7 @@ import com.siteflow.signature.cso.onboarding.domain.OnboardingViewModel
 import com.siteflow.signature.cso.onboarding.domain.OnboardingValidator
 import com.siteflow.signature.core.presentation.components.SignatureButton
 import com.siteflow.signature.core.presentation.components.dismissKeyboardOnTap
+import com.siteflow.signature.core.presentation.components.imeBottomPadding
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import com.siteflow.signature.shared.pfp.AgreementClause
@@ -102,6 +103,7 @@ fun OnboardingStep5Screen(
             .fillMaxSize()
             .background(Color(0xFFF9FAFB))
             .dismissKeyboardOnTap()
+            .imeBottomPadding()
     ) {
         Column(
             modifier = Modifier
@@ -176,7 +178,6 @@ fun OnboardingStep5Screen(
                 .fillMaxWidth()
                 .shadow(elevation = 4.dp)
                 .background(Color.White)
-                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             if (!state.isOtpSent) {

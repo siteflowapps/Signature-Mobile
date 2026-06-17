@@ -8,16 +8,6 @@ import com.siteflow.signature.cso.onboarding.data.dto.DistributorDto
 import com.siteflow.signature.cso.onboarding.data.dto.SlabDto
 
 /**
- * Payout model for an outlet.
- * DYNAMIC = volume-based slab payout (no extra input needed).
- * FIXED   = fixed monthly payout (requires volume commitment + monthly amount).
- */
-enum class PayoutType(val label: String, val description: String) {
-    DYNAMIC("Volume-based Payout Slab", "Volume-based slab payout calculated monthly"),
-    FIXED("Fixed Payout Slab", "Fixed monthly payout with committed volume")
-}
-
-/**
  * Payment method mode selected by the user in the Bank Details step.
  * BANK = traditional bank account details + cancelled cheque required.
  * UPI  = UPI ID only; cancelled cheque is not required.
@@ -56,9 +46,6 @@ sealed interface OnboardingAction {
     data object FetchSlabs : OnboardingAction
     data class SlabSelected(val slabId: String) : OnboardingAction
     data class StockingItemToggled(val item: String) : OnboardingAction
-    data class PayoutTypeSelected(val type: PayoutType) : OnboardingAction
-    data class FixedMonthlyVolumeChanged(val value: String) : OnboardingAction
-    data class FixedMonthlyAmountChanged(val value: String) : OnboardingAction
     data class MonthlyRentalAmountChanged(val value: String) : OnboardingAction
     data class ExpectedSalesPotentialChanged(val value: String) : OnboardingAction
 
@@ -140,9 +127,6 @@ data class OnboardingState(
     val slabs: List<SlabDto> = emptyList(),
     val isSlabsLoading: Boolean = false,
     val stockingCommitment: List<String> = emptyList(),
-    val payoutType: PayoutType = PayoutType.DYNAMIC,
-    val fixedMonthlyVolume: String = "",   // cases/month (numeric)
-    val fixedMonthlyAmount: String = "",   // ₹/month   (numeric)
     val monthlyRentalAmount: String = "",  // ₹/month rent (numeric) — backend-required
     val expectedSalesPotential: String = "", // ₹/month expected sales (numeric) — backend-required
 

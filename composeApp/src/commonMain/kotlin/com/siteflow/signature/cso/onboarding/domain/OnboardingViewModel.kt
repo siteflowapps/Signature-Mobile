@@ -337,28 +337,6 @@ class OnboardingViewModel(
                 }
             }
 
-            is OnboardingAction.PayoutTypeSelected -> {
-                updateState {
-                    it.copy(
-                        payoutType = action.type,
-                        // Clear fixed fields when switching back to dynamic
-                        fixedMonthlyVolume = if (action.type == PayoutType.DYNAMIC) "" else it.fixedMonthlyVolume,
-                        fixedMonthlyAmount = if (action.type == PayoutType.DYNAMIC) "" else it.fixedMonthlyAmount,
-                        error = null
-                    )
-                }
-            }
-
-            is OnboardingAction.FixedMonthlyVolumeChanged -> {
-                val filtered = action.value.filter { it.isDigit() }.take(6)
-                updateState { it.copy(fixedMonthlyVolume = filtered, error = null) }
-            }
-
-            is OnboardingAction.FixedMonthlyAmountChanged -> {
-                val filtered = action.value.filter { it.isDigit() }.take(8)
-                updateState { it.copy(fixedMonthlyAmount = filtered, error = null) }
-            }
-
             is OnboardingAction.MonthlyRentalAmountChanged -> {
                 val filtered = action.value.filter { it.isDigit() }.take(8)
                 updateState { it.copy(monthlyRentalAmount = filtered, error = null) }

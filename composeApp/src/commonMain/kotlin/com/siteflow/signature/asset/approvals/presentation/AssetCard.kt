@@ -70,6 +70,10 @@ fun AssetCard(
     val outletActive = outlet.status == OutletStatus.ASM_APPROVED || outlet.status == OutletStatus.ONBOARDED
     val req = state.request
 
+    // The CSO may raise multiple cooler requests, but only once the previous one
+    // is completed (COMPLIANT). While a request is in progress, no new one is allowed.
+    val canReRequestCooler = isCso && outletActive && kind == "COOLER" && req?.status == "COMPLIANT"
+
     // No request yet → only the CSO (on an active outlet) sees a "Request" action.
     if (req == null) {
         if (isCso && outletActive) {
@@ -158,6 +162,14 @@ fun AssetCard(
                     colors = ButtonDefaults.buttonColors(containerColor = AppColors.Primary),
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Upload Compliance", style = AppTypography.Button, color = Color.White) }
+            } else if (canReRequestCooler) {
+                Spacer(Modifier.size(12.dp))
+                Button(
+                    onClick = onRequest,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Request Another Cooler", style = AppTypography.Button, color = Color.White) }
             }
         }
     }

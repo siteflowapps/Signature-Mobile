@@ -37,6 +37,7 @@ import com.siteflow.signature.cso.onboarding.domain.OnboardingViewModel
 import com.siteflow.signature.cso.onboarding.domain.OnboardingValidator
 import com.siteflow.signature.core.presentation.components.SignatureButton
 import com.siteflow.signature.core.presentation.components.dismissKeyboardOnTap
+import com.siteflow.signature.core.presentation.components.imeBottomPadding
 import com.siteflow.signature.core.presentation.components.SignatureDropdown
 import com.siteflow.signature.core.presentation.components.SignatureTextField
 import com.siteflow.signature.core.presentation.design.AppColors
@@ -92,6 +93,7 @@ fun OnboardingStep1Screen(
             .fillMaxSize()
             .background(Color(0xFFF9FAFB))
             .dismissKeyboardOnTap()
+            .imeBottomPadding()
     ) {
 
         // ── Form Content (scrollable) ──
@@ -428,7 +430,6 @@ fun OnboardingStep1Screen(
                 .fillMaxWidth()
                 .shadow(elevation = 4.dp)
                 .background(Color.White)
-                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             SignatureButton(

@@ -154,7 +154,6 @@ class OutletRepository(
             return NetworkResult.Error(ApiError(-1, "Please select a distributor"))
         }
 
-        val isFixed = state.payoutType == com.siteflow.signature.cso.onboarding.domain.PayoutType.FIXED
         val isBankMode = state.bankPaymentMode == com.siteflow.signature.cso.onboarding.domain.BankPaymentMode.BANK
 
         val dto = BusinessDetailsRequestDto(
@@ -172,12 +171,13 @@ class OutletRepository(
             accountHolderName = state.accountHolderName,
             bankName = state.bankName,
             branch = state.branchName.ifBlank { null },
-            payoutType = if (isFixed) "FIXED" else "DYNAMIC",
-            // Backend requires slabClassification (@NotNull). For FIXED the
-            // classification UI is hidden, so default to SILVER when unset.
+            // Payout is always volume-based (DYNAMIC); the FIXED option was removed from the UI.
+            payoutType = "DYNAMIC",
+            // Backend requires slabClassification (@NotNull); default to SILVER when unset.
             slabClassification = state.selectedClassification.ifBlank { "SILVER" },
-            monthlyVolumeCommitment = if (isFixed) state.fixedMonthlyVolume.toIntOrNull() else null,
-            monthlyPayoutAmount = if (isFixed) state.fixedMonthlyAmount.toIntOrNull() else null
+            // No longer collected in the UI — hardcoded (null = not applicable for DYNAMIC).
+            monthlyVolumeCommitment = null,
+            monthlyPayoutAmount = null
         )
 
         // Read cancelled cheque image bytes (if captured)
@@ -509,7 +509,12 @@ class OutletRepository(
         kind: String
     ): NetworkResult<com.siteflow.signature.cso.onboarding.data.dto.AssetRequestItemDto?, ApiError> {
         return outletApi.getAssetRequests(kind = kind, outletId = outletId).map { resp ->
-            resp.data?.content?.firstOrNull { it.status != null && it.status != "REJECTED" }
+            // The outlet can have multiple requests of a kind (a new cooler request is
+            // allowed once the previous is COMPLIANT). Pick the latest non-rejected one
+            // by createdAt so the card reflects the current request regardless of order.
+            resp.data?.content
+                ?.filter { it.status != null && it.status != "REJECTED" }
+                ?.maxByOrNull { it.createdAt ?: "" }
         }
     }
 

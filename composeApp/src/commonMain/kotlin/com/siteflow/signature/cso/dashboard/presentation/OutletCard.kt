@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Check
 import com.siteflow.signature.core.presentation.components.CompactSignatureStepper
 import com.siteflow.signature.core.presentation.components.StepState
 import com.siteflow.signature.core.presentation.components.StepperItem
@@ -54,33 +55,22 @@ fun OutletCard(
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = { if (outlet.isContinuingOnboarding) onContinue() else onViewDetails() },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-            // ── Left colour bar (status-driven) ──
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(
-                        outlet.status.barColor,
-                        RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
-                    )
-            )
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // ════════════════════════════════
-                //  Zone A — Identity
-                // ════════════════════════════════
-                OutletCardIdentityRow(outlet)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // ════════════════════════════════
+            //  Zone A — Identity
+            // ════════════════════════════════
+            OutletCardIdentityRow(outlet)
 
                 // ════════════════════════════════
                 //  Zone B — Progress
@@ -97,8 +87,8 @@ fun OutletCard(
                 //  Zone C — Asset Status Chips
                 //  (only when at least one asset requested)
                 // ════════════════════════════════
-                val coolerChip   = assetChipData("🧊", "Cooler", outlet.coolerComplianceStatus)
-                val brandingChip = assetChipData("📣", "Branding", outlet.marketingComplianceStatus)
+                val coolerChip   = assetChipData("Cooler", outlet.coolerComplianceStatus)
+                val brandingChip = assetChipData("Branding", outlet.marketingComplianceStatus)
 
                 if (coolerChip != null || brandingChip != null) {
                     Row(
@@ -139,7 +129,6 @@ fun OutletCard(
                         }
                     )
                 }
-            }
         }
     }
 }
@@ -155,11 +144,12 @@ private fun OutletCardIdentityRow(outlet: OutletItem) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar circle with initials
+        // Avatar circle with initials — neutral tint so identity reads separately
+        // from the status badge (no two same-coloured blobs).
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(outlet.status.bgColor, CircleShape),
+                .background(Color(0xFFF1F5F9), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -168,7 +158,7 @@ private fun OutletCardIdentityRow(outlet: OutletItem) {
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 ),
-                color = outlet.status.color
+                color = Color(0xFF475569)
             )
         }
 
@@ -204,12 +194,19 @@ private fun OutletCardIdentityRow(outlet: OutletItem) {
             }
         }
 
-        // Status badge
-        Box(
+        // Status badge — pill with a leading status dot
+        Row(
             modifier = Modifier
                 .background(outlet.status.bgColor, RoundedCornerShape(8.dp))
-                .padding(horizontal = 9.dp, vertical = 4.dp)
+                .padding(horizontal = 9.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(outlet.status.color, CircleShape)
+            )
             Text(
                 text = outlet.status.label,
                 style = AppTypography.Caption.copy(
@@ -232,31 +229,41 @@ private fun DraftProgressBar(outlet: OutletItem) {
     val currentStep = outlet.onboardingStep
     val total = 6
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Setup: Step ${currentStep - 1} of $total",
+                style = AppTypography.Caption.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = AppColors.TextSecondary
+            )
+        }
+
         // Segmented fill bar
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(3.dp)
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             for (i in 1..total) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(4.dp)
+                        .height(3.dp)
                         .background(
                             color = if (i < currentStep) AppColors.StepDone
-                                    else if (i == currentStep) AppColors.StepActive.copy(alpha = 0.6f)
+                                    else if (i == currentStep) AppColors.StepActive
                                     else AppColors.StepLine,
-                            shape = RoundedCornerShape(2.dp)
+                            shape = RoundedCornerShape(1.dp)
                         )
                 )
             }
         }
-        Text(
-            text = "Setup: Step ${currentStep - 1} of $total",
-            style = AppTypography.Caption.copy(fontSize = 10.sp),
-            color = AppColors.TextTertiary
-        )
     }
 }
 
@@ -282,27 +289,61 @@ private fun OutletCardPipelineRow(outlet: OutletItem) {
         )
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    val activeStep = steps.firstOrNull {
+        it.state == StepState.ACTIVE || it.state == StepState.REJECTED
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Glanceable 5-step journey — consistent with the detail page timeline.
         CompactSignatureStepper(
-            steps = steps,
-            dotSize = 16.dp,
+            steps    = steps,
+            dotSize  = 14.dp,
             modifier = Modifier.fillMaxWidth()
         )
-        // Current step label
-        val activeStep = steps.firstOrNull {
-            it.state == StepState.ACTIVE || it.state == StepState.REJECTED
-        }
+
         if (activeStep != null) {
-            val prefix = if (activeStep.state == StepState.REJECTED) "❌" else "→"
-            Text(
-                text = "$prefix ${activeStep.label}",
-                style = AppTypography.Caption.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = if (activeStep.state == StepState.REJECTED)
-                    AppColors.StepRejected else AppColors.StepActive
-            )
+            val isRejected = activeStep.state == StepState.REJECTED
+            val dotColor = if (isRejected) AppColors.StepRejected else AppColors.StepActive
+            val prefix = if (isRejected) "Action Required:" else "Next:"
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(dotColor, CircleShape)
+                )
+                Text(
+                    text = "$prefix ${activeStep.label}",
+                    style = AppTypography.Caption.copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = if (isRejected) AppColors.StepRejected else AppColors.TextSecondary
+                )
+            }
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = AppColors.StepDone,
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = "Fully Onboarded",
+                    style = AppTypography.Caption.copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = AppColors.StepDone
+                )
+            }
         }
     }
 }
@@ -312,13 +353,12 @@ private fun OutletCardPipelineRow(outlet: OutletItem) {
 // ──────────────────────────────────────────────────────────────────────────
 
 private data class AssetChipData(
-    val emoji: String,
     val label: String,
     val color: Color,
     val bgColor: Color
 )
 
-private fun assetChipData(emoji: String, prefix: String, status: String): AssetChipData? {
+private fun assetChipData(prefix: String, status: String): AssetChipData? {
     val (label, color, bg) = when (status) {
         "REQUESTED"            -> Triple("Requested",        AppColors.AssetPending,   AppColors.AssetPendingBg)
         "ASE_APPROVED",
@@ -328,27 +368,34 @@ private fun assetChipData(emoji: String, prefix: String, status: String): AssetC
         "EXECUTED"             -> Triple("Installed",         AppColors.AssetExecuted,  AppColors.AssetExecutedBg)
         "SUBMITTED",
         "COMPLIANCE_SUBMITTED" -> Triple("Compliance Due",   AppColors.AssetExecuted,  AppColors.AssetExecutedBg)
-        "COMPLIANT"            -> Triple("Compliant ✓",      AppColors.AssetCompliant, AppColors.AssetCompliantBg)
+        "COMPLIANT"            -> Triple("Compliant",        AppColors.AssetCompliant, AppColors.AssetCompliantBg)
         "OVERDUE",
-        "COMPLIANCE_OVERDUE"   -> Triple("Overdue ⚠",        AppColors.AssetOverdue,   AppColors.AssetOverdueBg)
+        "COMPLIANCE_OVERDUE"   -> Triple("Overdue",          AppColors.AssetOverdue,   AppColors.AssetOverdueBg)
         "NON_COMPLIANT"        -> Triple("Non-compliant",    AppColors.AssetOverdue,   AppColors.AssetOverdueBg)
         else                   -> return null // NOT_REQUESTED — render nothing
     }
-    return AssetChipData("$emoji", "$prefix: $label", color, bg)
+    return AssetChipData("$prefix · $label", color, bg)
 }
 
 @Composable
 private fun AssetChip(data: AssetChipData) {
-    Box(
+    Row(
         modifier = Modifier
-            .background(data.bgColor, RoundedCornerShape(6.dp))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .background(data.bgColor, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .background(data.color, CircleShape)
+        )
         Text(
-            text = "${data.emoji} ${data.label}",
+            text = data.label,
             style = AppTypography.Caption.copy(
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
             ),
             color = data.color
         )

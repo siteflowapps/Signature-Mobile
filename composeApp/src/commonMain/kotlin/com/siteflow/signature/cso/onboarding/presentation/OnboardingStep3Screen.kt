@@ -39,6 +39,7 @@ import com.siteflow.signature.cso.onboarding.domain.OnboardingValidator
 import com.siteflow.signature.core.domain.ImagePicker
 import com.siteflow.signature.core.presentation.components.SignatureButton
 import com.siteflow.signature.core.presentation.components.dismissKeyboardOnTap
+import com.siteflow.signature.core.presentation.components.imeBottomPadding
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import kotlinx.coroutines.flow.collectLatest
@@ -77,6 +78,7 @@ fun OnboardingStep3Screen(
             .fillMaxSize()
             .background(Color(0xFFF9FAFB))
             .dismissKeyboardOnTap()
+            .imeBottomPadding()
     ) {
         // ── Content (scrollable) ──
         Column(
@@ -179,7 +181,6 @@ fun OnboardingStep3Screen(
                 .fillMaxWidth()
                 .shadow(elevation = 4.dp)
                 .background(Color.White)
-                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             SignatureButton(
