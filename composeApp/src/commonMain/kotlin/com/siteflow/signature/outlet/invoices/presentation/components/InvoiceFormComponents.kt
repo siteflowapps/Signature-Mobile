@@ -132,14 +132,14 @@ fun ScanChip(label: String, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Search,
             contentDescription = null,
-            tint = Color(0xFF3B82F6),
+            tint = Color(0xFF14B8A6),
             modifier = Modifier.size(13.dp)
         )
         Spacer(Modifier.width(3.dp))
         Text(
             text = label,
             fontSize = 11.sp,
-            color = Color(0xFF3B82F6),
+            color = Color(0xFF14B8A6),
             fontWeight = FontWeight.Medium
         )
     }

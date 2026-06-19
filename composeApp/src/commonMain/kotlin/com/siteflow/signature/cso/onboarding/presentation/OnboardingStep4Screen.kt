@@ -365,9 +365,9 @@ private fun PaymentModeToggle(
             label = "Bank Account",
             subtitle = "NEFT / IMPS transfer",
             isSelected = selectedMode == BankPaymentMode.BANK,
-            selectedColor = Color(0xFF2563EB),
-            iconBubbleColor = Color(0xFFEFF6FF),
-            iconTint = Color(0xFF2563EB),
+            selectedColor = Color(0xFF0D9488),
+            iconBubbleColor = Color(0xFFF0FDFA),
+            iconTint = Color(0xFF0D9488),
             modifier = Modifier.weight(1f),
             onClick = { onModeSelected(BankPaymentMode.BANK) }
         )
@@ -711,7 +711,7 @@ private fun UpiDetailsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = Color(0xFFEFF6FF),
+                    color = Color(0xFFF0FDFA),
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(14.dp),
@@ -720,14 +720,14 @@ private fun UpiDetailsSection(
             Icon(
                 imageVector = Icons.Default.PhoneAndroid,
                 contentDescription = null,
-                tint = Color(0xFF3B82F6),
+                tint = Color(0xFF14B8A6),
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.width(10.dp))
             Text(
                 text = "Payments will be transferred directly to your UPI ID. No cheque upload required.",
                 style = AppTypography.Caption.copy(fontSize = 12.sp),
-                color = Color(0xFF1E40AF)
+                color = Color(0xFF0F766E)
             )
         }
 

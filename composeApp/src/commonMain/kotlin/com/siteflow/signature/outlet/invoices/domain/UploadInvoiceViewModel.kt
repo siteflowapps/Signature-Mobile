@@ -537,7 +537,13 @@ class UploadInvoiceViewModel(
      */
     private fun applyOcrResult(data: OcrInvoiceData) {
         val allItems = data.items.mapIndexed { i, item ->
-            val calcTotal = (item.mrpPerCase ?: 0.0) * item.finalQuantity
+            // `finalQuantity`/MRP aren't always returned yet; fall back to the
+            // invoiced values the OCR does send so qty/totals are never zero.
+            val effectiveQty = if (item.finalQuantity > 0) item.finalQuantity else item.invoicedQuantity
+            // Prefer MRP-based revenue (Signature basis); fall back to the invoiced
+            // line total until the backend populates MRP for the matched SKU.
+            val mrpTotal = (item.mrpPerCase ?: 0.0) * effectiveQty
+            val lineTotal = if (mrpTotal > 0.0) mrpTotal else item.invoicedTotalPrice
             SkuLineItem(
                 id = "ai-item-$i",
                 productName = item.matchedSkuName ?: item.invoicedSkuName,
@@ -548,12 +554,12 @@ class UploadInvoiceViewModel(
                 quantity = item.invoicedQuantity,
                 unit = item.invoicedUnit,
                 pricePerUnit = item.invoicedUnitPrice,
-                totalPrice = calcTotal,
+                totalPrice = lineTotal,
                 caseConfiguration = item.caseConfiguration,
                 mrpPerCase = item.mrpPerCase,
                 mrpPerBottle = item.mrpPerBottle,
-                finalQuantity = item.finalQuantity,
-                finalUnit = item.finalUnit,
+                finalQuantity = effectiveQty,
+                finalUnit = item.finalUnit.ifBlank { item.invoicedUnit },
                 confidence = item.confidence,
                 isNonCatalogItem = item.isNonCatalogItem,
                 lowConfidenceReason = item.lowConfidenceReason
@@ -562,7 +568,9 @@ class UploadInvoiceViewModel(
 
         val matchedItems = allItems.filter { it.confidence >= 90 }
         val rejectedItems = allItems.filter { it.confidence < 90 }
-        val grandTotal = matchedItems.sumOf { it.totalPrice }
+        // Headline = invoice total from the OCR response; fall back to the matched line sum.
+        val grandTotal = data.totalInvoiceAmount.toDoubleOrNull()?.takeIf { it > 0.0 }
+            ?: matchedItems.sumOf { it.totalPrice }
 
         val current = state.value.formData
         val updatedForm = current.copy(

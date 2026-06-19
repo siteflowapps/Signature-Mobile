@@ -34,6 +34,7 @@ data class OcrInvoiceData(
 data class OcrLineItem(
     // ── Invoiced (raw OCR) fields ──
     @SerialName("invoicedSkuName") val invoicedSkuName: String = "",
+    @SerialName("invoicedArticleCode") val invoicedArticleCode: String? = null,
     @SerialName("invoicedQuantity") val invoicedQuantity: Int = 0,
     @SerialName("invoicedUnit") val invoicedUnit: String = "",
     @SerialName("invoicedUnitPrice") val invoicedUnitPrice: Double = 0.0,
@@ -44,14 +45,19 @@ data class OcrLineItem(
     @SerialName("matchedSkuName") val matchedSkuName: String? = null,
     @SerialName("caseConfiguration") val caseConfiguration: Int? = null,
     @SerialName("mrpPerCase") val mrpPerCase: Double? = null,
-    @SerialName("mrpPerBottle") val mrpPerBottle: Double? = null,
+    // Backend sends per-unit MRP as `mrpPerUnit`; kept as `mrpPerBottle` for the UI's
+    // per-bottle price line. Null until the backend populates MRP for the matched SKU.
+    @SerialName("mrpPerUnit") val mrpPerBottle: Double? = null,
+    @SerialName("isSchemeItem") val isSchemeItem: Boolean = false,
 
     // ── Final resolved values ──
     @SerialName("finalQuantity") val finalQuantity: Int = 0,
     @SerialName("finalUnit") val finalUnit: String = "",
 
-    // ── Confidence & rejection ──
-    @SerialName("confidence") val confidence: Int = 0,
+    // ── Match score & rejection ──
+    // Backend sends the catalog match score as `matchedPercentage` (0–100); we keep
+    // the Kotlin name `confidence` since downstream uses the same ≥90 threshold.
+    @SerialName("matchedPercentage") val confidence: Int = 0,
     @SerialName("isNonCatalogItem") val isNonCatalogItem: Boolean = false,
     @SerialName("lowConfidenceReason") val lowConfidenceReason: String? = null
 )

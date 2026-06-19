@@ -778,7 +778,7 @@ private fun TimelineStepContent(
 private fun StatusBadge(label: String, status: TimelineStepStatus) {
     val bgColor = when (status) {
         TimelineStepStatus.COMPLETED -> Color(0xFFD1FAE5)
-        TimelineStepStatus.PROCESSING -> Color(0xFFDBEAFE)
+        TimelineStepStatus.PROCESSING -> Color(0xFFCCFBF1)
         TimelineStepStatus.PENDING -> Color(0xFFF3F4F6)
     }
     val textColor = when (status) {
@@ -834,8 +834,8 @@ private fun PayoutSchemeCard() {
 
             PayoutInfoRow(
                 icon = Icons.Default.TrendingUp,
-                iconBg = Color(0xFFEFF6FF),
-                iconTint = Color(0xFF2563EB),
+                iconBg = Color(0xFFF0FDFA),
+                iconTint = Color(0xFF0D9488),
                 title = "Volume-Based Slab",
                 subtitle = "Your payout tier is determined by your cumulative monthly case volume."
             )

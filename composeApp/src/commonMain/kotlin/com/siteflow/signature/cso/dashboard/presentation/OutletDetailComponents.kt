@@ -883,7 +883,7 @@ fun ComplianceRecordCard(outlet: OutletItem) {
     }
     val statusBg = when {
         record.verified -> AppColors.greenE7
-        else -> Color(0xFFDBEAFE)
+        else -> Color(0xFFCCFBF1)
     }
 
     SectionCard(

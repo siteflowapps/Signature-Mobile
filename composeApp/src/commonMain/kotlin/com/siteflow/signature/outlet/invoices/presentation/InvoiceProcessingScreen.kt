@@ -68,7 +68,7 @@ fun InvoiceProcessingScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFF0F4FF), Color(0xFFFFFFFF))
+                    colors = listOf(Color(0xFFF0FDFA), Color(0xFFFFFFFF))
                 )
             )
     ) {

@@ -130,7 +130,7 @@ private fun AseUserCard(ase: AseUserDto) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEFF6FF)),
+                    .background(Color(0xFFF0FDFA)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

@@ -478,7 +478,7 @@ private fun TicketStatusBadge(isOpen: Boolean) {
 @Composable
 private fun CategoryDot(category: String) {
     val color = when {
-        category.contains("App", ignoreCase = true) -> Color(0xFF3B82F6)
+        category.contains("App", ignoreCase = true) -> Color(0xFF14B8A6)
         category.contains("Invoice", ignoreCase = true) -> Color(0xFF8B5CF6)
         category.contains("Payout", ignoreCase = true) -> Color(0xFF10B981)
         category.contains("Login", ignoreCase = true) || category.contains("OTP", ignoreCase = true) -> Color(0xFFEF4444)
@@ -562,7 +562,7 @@ private fun EmptyTicketsState(filter: TicketFilter) {
             Box(
                 modifier = Modifier
                     .size(72.dp)
-                    .background(Color(0xFFEFF6FF), CircleShape),
+                    .background(Color(0xFFF0FDFA), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

@@ -71,7 +71,7 @@ fun LoadingMoreIndicator(
                     .size(8.dp)
                     .scale(animatedScale)
                     .alpha(animatedAlpha)
-                    .background(Color(0xFF3B82F6), CircleShape)
+                    .background(Color(0xFF14B8A6), CircleShape)
             )
         }
 

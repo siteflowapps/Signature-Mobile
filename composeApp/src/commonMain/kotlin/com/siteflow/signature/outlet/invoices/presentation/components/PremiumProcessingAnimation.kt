@@ -126,13 +126,13 @@ fun PremiumProcessingAnimation(
             // ── Radial pulse rings from AI node ──
             val maxPulseR = nodeR * 4.2f
             drawCircle(
-                color = Color(0xFF2471E7).copy(alpha = (1f - pulse) * 0.42f),
+                color = Color(0xFF0F766E).copy(alpha = (1f - pulse) * 0.42f),
                 radius = nodeR + maxPulseR * pulse,
                 center = Offset(nodeX, nodeY),
                 style = Stroke(width = 2.dp.toPx())
             )
             drawCircle(
-                color = Color(0xFF3B82F6).copy(alpha = (1f - pulse2) * 0.28f),
+                color = Color(0xFF14B8A6).copy(alpha = (1f - pulse2) * 0.28f),
                 radius = nodeR + maxPulseR * pulse2,
                 center = Offset(nodeX, nodeY),
                 style = Stroke(width = 1.5f)
@@ -142,7 +142,7 @@ fun PremiumProcessingAnimation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF2471E7).copy(alpha = glowAlpha * 0.42f),
+                        Color(0xFF0F766E).copy(alpha = glowAlpha * 0.42f),
                         Color.Transparent
                     ),
                     center = Offset(nodeX, nodeY),
@@ -155,7 +155,7 @@ fun PremiumProcessingAnimation(
             // ── AI node core (radial gradient circle) ──
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF93C5FD), Color(0xFF2471E7), Color(0xFF1D4ED8)),
+                    colors = listOf(Color(0xFF93C5FD), Color(0xFF0F766E), Color(0xFF0F766E)),
                     center = Offset(nodeX - nodeR * 0.25f, nodeY - nodeR * 0.25f),
                     radius = nodeR * 1.3f
                 ),
@@ -177,7 +177,7 @@ fun PremiumProcessingAnimation(
 
             // ── Dashed connector (node → document top) ──
             drawLine(
-                color = Color(0xFF2471E7).copy(alpha = 0.14f),
+                color = Color(0xFF0F766E).copy(alpha = 0.14f),
                 start = Offset(nodeX, nodeY + nodeR),
                 end = Offset(nodeX, docT),
                 strokeWidth = 1.5f,
@@ -186,7 +186,7 @@ fun PremiumProcessingAnimation(
 
             // ── Document outer glow ──
             drawRoundRect(
-                color = Color(0xFF2471E7).copy(alpha = glowAlpha * 0.16f),
+                color = Color(0xFF0F766E).copy(alpha = glowAlpha * 0.16f),
                 topLeft = Offset(docL - 8f, docT - 8f),
                 size = Size(docW + 16f, docH + 16f),
                 cornerRadius = CornerRadius(corner + 8f)
@@ -204,7 +204,7 @@ fun PremiumProcessingAnimation(
             drawRoundRect(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFF2471E7).copy(alpha = 0.72f),
+                        Color(0xFF0F766E).copy(alpha = 0.72f),
                         Color(0xFF60A5FA).copy(alpha = 0.48f)
                     ),
                     start = Offset(docL, docT),
@@ -264,9 +264,9 @@ fun PremiumProcessingAnimation(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color(0xFF2471E7).copy(alpha = 0.40f),
+                            Color(0xFF0F766E).copy(alpha = 0.40f),
                             Color(0xFF60A5FA).copy(alpha = 0.72f),
-                            Color(0xFF2471E7).copy(alpha = 0.40f),
+                            Color(0xFF0F766E).copy(alpha = 0.40f),
                             Color.Transparent
                         ),
                         startY = beamTop,
@@ -303,7 +303,7 @@ fun PremiumProcessingAnimation(
 
                 // Glow halo
                 drawCircle(
-                    color = Color(0xFF3B82F6).copy(alpha = alpha * 0.32f),
+                    color = Color(0xFF14B8A6).copy(alpha = alpha * 0.32f),
                     radius = radius * 2.4f,
                     center = Offset(px, py)
                 )

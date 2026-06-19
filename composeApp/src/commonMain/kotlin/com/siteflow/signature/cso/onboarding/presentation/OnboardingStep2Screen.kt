@@ -1,38 +1,20 @@
 package com.siteflow.signature.cso.onboarding.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CurrencyRupee
-import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,8 +23,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.siteflow.signature.cso.onboarding.data.Classification
-import com.siteflow.signature.cso.onboarding.data.dto.SlabDto
 import com.siteflow.signature.cso.onboarding.domain.OnboardingAction
 import com.siteflow.signature.cso.onboarding.domain.OnboardingEvent
 import com.siteflow.signature.cso.onboarding.domain.OnboardingViewModel
@@ -69,8 +49,6 @@ fun OnboardingStep2Screen(
         viewModel.onAction(OnboardingAction.SetCurrentStep(2))
         // When resuming from dashboard, set the outlet ID in state
         outletId?.let { viewModel.onAction(OnboardingAction.SetOutletId(it)) }
-        // Fetch classification slabs from API
-        viewModel.onAction(OnboardingAction.FetchSlabs)
         viewModel.events.collectLatest { event ->
             when (event) {
                 OnboardingEvent.NavigateBack -> onBack()
@@ -96,50 +74,6 @@ fun OnboardingStep2Screen(
         ) {
             // How Payout Works Card
             PayoutInfoCard()
-
-            Spacer(Modifier.height(20.dp))
-
-            // Suggested Classification — payout is always volume-based (slab decided
-            // by actual sales). The slab is auto-selected from the API.
-            Text(
-                text = "Suggested Classification",
-                style = AppTypography.TitleMedium.copy(
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = Color(0xFF374151)
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            ClassificationHeroCard(
-                classificationLabel = state.selectedClassification,
-                slabs = state.slabs
-            )
-
-            Spacer(Modifier.height(20.dp))
-
-            // Classification Slabs (dynamic from API)
-            if (state.isSlabsLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = AppColors.BlueGradientStart
-                    )
-                }
-            } else if (state.slabs.isNotEmpty()) {
-                DynamicSlabsList(
-                    slabs = state.slabs,
-                    selectedClassification = state.selectedClassification,
-                    onSlabSelected = { slabId ->
-                        viewModel.onAction(OnboardingAction.SlabSelected(slabId))
-                    }
-                )
-            }
 
             Spacer(Modifier.height(20.dp))
 
@@ -217,7 +151,7 @@ private fun PayoutInfoCard() {
                     .fillMaxWidth()
                     .background(
                         brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            colors = listOf(Color(0xFF1E40AF), Color(0xFF3B82F6))
+                            colors = listOf(Color(0xFF0F766E), Color(0xFF14B8A6))
                         ),
                         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                     )
@@ -235,21 +169,31 @@ private fun PayoutInfoCard() {
 
             Column(modifier = Modifier.padding(16.dp)) {
                 PayoutInfoRow(
-                    icon = Icons.Default.TrendingUp,
-                    iconBg = Color(0xFFEFF6FF),
-                    iconTint = Color(0xFF2563EB),
-                    title = "Volume-Based Slab",
-                    subtitle = "Your payout tier is determined by your cumulative monthly case volume"
+                    icon = Icons.Default.CurrencyRupee,
+                    iconBg = Color(0xFFF0FDFA),
+                    iconTint = Color(0xFF0D9488),
+                    title = "Fixed Monthly Rental",
+                    subtitle = "The outlet earns a fixed rental every month for hosting Signature coolers and branding."
                 )
 
                 Spacer(Modifier.height(14.dp))
 
                 PayoutInfoRow(
-                    icon = Icons.Default.Category,
+                    icon = Icons.Default.TrendingUp,
+                    iconBg = Color(0xFFECFDF5),
+                    iconTint = Color(0xFF059669),
+                    title = "Performance Bonus",
+                    subtitle = "Beat the monthly sales targets to unlock an extra performance payout on top of the rental."
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                PayoutInfoRow(
+                    icon = Icons.Default.Percent,
                     iconBg = Color(0xFFFFF7ED),
                     iconTint = Color(0xFFEA580C),
-                    title = "CSD, Juices and Energy categories Included",
-                    subtitle = "Payout is applicable on CSD, Juices and Energy categories."
+                    title = "Rental Stays Fair to Sales",
+                    subtitle = "Rental is kept in healthy proportion to the outlet's monthly sales — that's why we capture both below."
                 )
             }
         }
@@ -328,351 +272,3 @@ private fun InfoBanner(text: String) {
     }
 }
 
-@Composable
-private fun ClassificationHeroCard(
-    classificationLabel: String,
-    slabs: List<SlabDto>
-) {
-    // Find the index of the selected slab in the sorted list to get the right color theme
-    val sorted = slabs.sortedByDescending { it.minQuantity }
-    val selectedIndex = sorted.indexOfFirst { it.classification == classificationLabel }
-    val colors = getThemeByIndex(if (selectedIndex >= 0) selectedIndex else sorted.size - 1)
-    
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(2.dp, RoundedCornerShape(16.dp))
-            .background(colors.background, RoundedCornerShape(16.dp))
-            .border(1.dp, colors.border, RoundedCornerShape(16.dp))
-            .padding(vertical = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .background(colors.iconBg, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = colors.icon,
-                    contentDescription = "Classification: $classificationLabel",
-                    tint = colors.iconTint,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-            
-            Spacer(Modifier.height(16.dp))
-            
-            Text(
-                text = classificationLabel.ifBlank { "—" },
-                style = AppTypography.TitleMedium.copy(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                ),
-                color = colors.text
-            )
-            
-            Spacer(Modifier.height(4.dp))
-            
-            Text(
-                text = "Slab decided by actual sales volume",
-                style = AppTypography.Caption.copy(fontSize = 14.sp),
-                color = colors.text.copy(alpha = 0.8f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun ClassificationSlabsList(selected: Classification) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.MilitaryTech,
-                    contentDescription = null,
-                    tint = Color(0xFF6B7280),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "CLASSIFICATION SLABS",
-                    style = AppTypography.Caption.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
-                        fontSize = 11.sp
-                    ),
-                    color = Color(0xFF6B7280)
-                )
-            }
-            
-            Spacer(Modifier.height(16.dp))
-            
-            Classification.values().reversed().forEachIndexed { index, item ->
-                ClassificationSlabItem(
-                    classification = item,
-                    isSelected = item == selected
-                )
-                if (index < Classification.values().size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = Color(0xFFF3F4F6)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ClassificationSlabItem(
-    classification: Classification,
-    isSelected: Boolean
-) {
-    val theme = getClassificationTheme(classification)
-    val bgColor by animateColorAsState(
-        targetValue = if (isSelected) theme.background.copy(alpha = 0.5f) else Color.Transparent
-    )
-    val borderColor = if (isSelected) theme.border else Color.Transparent
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(theme.iconBg.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = theme.icon,
-                contentDescription = "${classification.label} tier",
-                tint = theme.iconTint,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        
-        Spacer(Modifier.width(12.dp))
-        
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = classification.label,
-                style = AppTypography.TitleMedium.copy(
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color(0xFF111827)
-            )
-            Text(
-                text = classification.description,
-                style = AppTypography.Caption.copy(fontSize = 13.sp),
-                color = Color(0xFF6B7280)
-            )
-        }
-        
-        Text(
-            text = classification.range,
-            style = AppTypography.Caption.copy(
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = if (isSelected) theme.text else Color(0xFF374151)
-        )
-    }
-}
-
-private data class ClassificationTheme(
-    val background: Color,
-    val border: Color,
-    val iconBg: Color,
-    val iconTint: Color,
-    val text: Color,
-    val icon: ImageVector
-)
-
-@Composable
-private fun getClassificationTheme(classification: Classification): ClassificationTheme {
-    return when (classification) {
-        Classification.PLATINUM -> ClassificationTheme(
-            background = Color(0xFFF5F3FF), // Light purple
-            border = Color(0xFFDDD6FE),
-            iconBg = Color(0xFFDDD6FE),
-            iconTint = Color(0xFF7C3AED),
-            text = Color(0xFF5B21B6),
-            icon = Icons.Default.Diamond
-        )
-        Classification.DIAMOND -> ClassificationTheme(
-            background = Color(0xFFF0F9FF), // Light blue
-            border = Color(0xFFBAE6FD),
-            iconBg = Color(0xFFBAE6FD),
-            iconTint = Color(0xFF0284C7),
-            text = Color(0xFF075985),
-            icon = Icons.Default.Diamond
-        )
-        Classification.GOLD -> ClassificationTheme(
-            background = Color(0xFFFFFBEB), // Light gold
-            border = Color(0xFFFEF3C7),
-            iconBg = Color(0xFFFEF3C7),
-            iconTint = Color(0xFFD97706),
-            text = Color(0xFF92400E),
-            icon = Icons.Default.WorkspacePremium
-        )
-        Classification.SILVER -> ClassificationTheme(
-            background = Color(0xFFF9FAFB), // Light grey
-            border = Color(0xFFE5E7EB),
-            iconBg = Color(0xFFE5E7EB),
-            iconTint = Color(0xFF6B7280),
-            text = Color(0xFF374151),
-            icon = Icons.Default.MilitaryTech
-        )
-    }
-}
-
-/**
- * Assigns a color theme by position index (sorted highest tier first).
- * index 0 = Platinum (purple), 1 = Diamond (blue), 2 = Gold (amber), 3+ = Silver (grey)
- */
-@Composable
-private fun getThemeByIndex(index: Int): ClassificationTheme {
-    return when (index) {
-        0 -> getClassificationTheme(Classification.PLATINUM)
-        1 -> getClassificationTheme(Classification.DIAMOND)
-        2 -> getClassificationTheme(Classification.GOLD)
-        else -> getClassificationTheme(Classification.SILVER)
-    }
-}
-
-@Composable
-private fun DynamicSlabsList(
-    slabs: List<SlabDto>,
-    selectedClassification: String,
-    onSlabSelected: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.MilitaryTech,
-                    contentDescription = null,
-                    tint = Color(0xFF6B7280),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "CLASSIFICATION SLABS",
-                    style = AppTypography.Caption.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
-                        fontSize = 11.sp
-                    ),
-                    color = Color(0xFF6B7280)
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Sort by minQuantity descending (highest tier first)
-            val sorted = slabs.sortedByDescending { it.minQuantity }
-            sorted.forEachIndexed { index, slab ->
-                val isSelected = slab.classification == selectedClassification
-                val theme = getThemeByIndex(index)
-                val range = if (slab.maxQuantity != null)
-                    "${slab.minQuantity.toInt()}-${slab.maxQuantity.toInt()} cs"
-                else
-                    "${slab.minQuantity.toInt()}+ cs"
-
-                val bgColor by animateColorAsState(
-                    targetValue = if (isSelected) theme.background.copy(alpha = 0.5f) else Color.Transparent
-                )
-                val borderColor = if (isSelected) theme.border else Color.Transparent
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onSlabSelected(slab.id) }
-                        .background(bgColor)
-                        .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Slab icon
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(theme.iconBg.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = theme.icon,
-                            contentDescription = "${slab.classification} tier",
-                            tint = theme.iconTint,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = slab.classification,
-                            style = AppTypography.TitleMedium.copy(
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFF111827)
-                        )
-                        Text(
-                            text = range,
-                            style = AppTypography.Caption.copy(fontSize = 13.sp),
-                            color = Color(0xFF6B7280)
-                        )
-                    }
-
-                    val payoutText = if (slab.percentage != null) {
-                        "${slab.percentage.toInt()}% payout"
-                    } else if (slab.ratePerCase != null) {
-                        "₹${slab.ratePerCase.toInt()}/cs payout"
-                    } else {
-                        "0% payout"
-                    }
-                    Text(
-                        text = payoutText,
-                        style = AppTypography.Caption.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = if (isSelected) theme.text else Color(0xFF374151)
-                    )
-                }
-
-                if (index < sorted.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = Color(0xFFF3F4F6)
-                    )
-                }
-            }
-        }
-    }
-}

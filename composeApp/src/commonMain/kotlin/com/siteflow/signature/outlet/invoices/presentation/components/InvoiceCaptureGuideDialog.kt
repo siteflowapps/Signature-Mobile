@@ -59,13 +59,13 @@ fun InvoiceCaptureGuideDialog(
                     Box(
                         modifier = Modifier
                             .size(56.dp)
-                            .background(Color(0xFFEFF6FF), CircleShape),
+                            .background(Color(0xFFF0FDFA), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.PhotoCamera,
                             contentDescription = null,
-                            tint = Color(0xFF2563EB),
+                            tint = Color(0xFF0D9488),
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -109,8 +109,8 @@ fun InvoiceCaptureGuideDialog(
                     )
                     CaptureTip(
                         icon = Icons.Default.CropFree,
-                        iconBg = Color(0xFFEFF6FF),
-                        iconTint = Color(0xFF2563EB),
+                        iconBg = Color(0xFFF0FDFA),
+                        iconTint = Color(0xFF0D9488),
                         title = "Fill the frame",
                         body = "Move closer so the invoice fills the camera view"
                     )
@@ -135,7 +135,7 @@ fun InvoiceCaptureGuideDialog(
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2563EB)
+                            containerColor = Color(0xFF0D9488)
                         ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                     ) {

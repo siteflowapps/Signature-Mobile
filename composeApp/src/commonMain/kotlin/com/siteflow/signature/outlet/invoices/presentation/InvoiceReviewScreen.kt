@@ -90,42 +90,33 @@ fun InvoiceReviewScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left side: Cases + Amount stacked
+                    // Left side: price-led total (cases are secondary)
                     val total = state.formData.invoiceSummary.grandTotal
                     val totalCases = state.formData.skuItems.sumOf { it.finalQuantity }
+                    val itemCount = state.formData.skuItems.size
 
                     Column {
-                        // Total Cases — highlighted green
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "$totalCases",
-                                style = AppTypography.TitleLarge.copy(
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = Color(0xFF059669)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "cases",
-                                style = AppTypography.Caption.copy(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = Color(0xFF059669).copy(alpha = 0.7f)
-                            )
-                        }
-                        // Invoice amount — secondary
-                        if (total > 0) {
-                            Text(
-                                text = "₹${formatPrice(total)}",
-                                style = AppTypography.Caption.copy(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = AppColors.TextTertiary
-                            )
-                        }
+                        Text(
+                            text = "Invoice Total",
+                            style = AppTypography.Caption.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = AppColors.TextTertiary
+                        )
+                        Text(
+                            text = "₹${formatPrice(total)}",
+                            style = AppTypography.TitleLarge.copy(
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = AppColors.Primary
+                        )
+                        Text(
+                            text = "$itemCount items · $totalCases cases",
+                            style = AppTypography.Caption.copy(fontSize = 11.sp),
+                            color = AppColors.TextTertiary
+                        )
                     }
 
                     Spacer(Modifier.width(16.dp))

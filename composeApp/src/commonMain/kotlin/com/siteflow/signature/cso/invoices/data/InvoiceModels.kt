@@ -15,7 +15,7 @@ enum class InvoiceStatus(
 ) {
     PENDING("Pending", Color(0xFFF59E0B), Color(0xFFFEF3C7)), // Legacy/Fallback
     SUBMITTED("Submitted", Color(0xFF6B7280), Color(0xFFF3F4F6)),
-    ASE_APPROVED("ASE Approved", Color(0xFF3B82F6), Color(0xFFDBEAFE)),
+    ASE_APPROVED("ASE Approved", Color(0xFF14B8A6), Color(0xFFCCFBF1)),
     ASM_APPROVED("ASM Approved", Color(0xFF8B5CF6), Color(0xFFEDE9FE)),
     RSM_APPROVED("RSM Approved", Color(0xFF7C3AED), Color(0xFFEDE9FE)),
     FINANCE_APPROVED("Finance Approved", Color(0xFF10B981), Color(0xFFD1FAE5)),

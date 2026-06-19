@@ -166,7 +166,7 @@ private fun AsmOverviewHeroCard(dashboard: DashboardData?) {
                 .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(Color(0xFF1E40AF), Color(0xFF3B82F6))
+                        colors = listOf(Color(0xFF0F766E), Color(0xFF14B8A6))
                     ),
                     RoundedCornerShape(18.dp)
                 )
@@ -349,8 +349,8 @@ private fun AsmQuickStatsGrid(
                 value = "${dashboard?.totalAse ?: 0}",
                 label = "My ASEs",
                 icon = Icons.Filled.Group,
-                iconBg = Color(0xFFEFF6FF),
-                iconTint = Color(0xFF2563EB),
+                iconBg = Color(0xFFF0FDFA),
+                iconTint = Color(0xFF0D9488),
                 onClick = onTotalAses,
                 modifier = Modifier.weight(1f)
             )

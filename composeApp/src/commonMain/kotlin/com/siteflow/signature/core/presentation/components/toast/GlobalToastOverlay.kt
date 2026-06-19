@@ -82,7 +82,7 @@ fun GlobalToastOverlay() {
                 val (bgColor, icon) = when (toast.type) {
                     ToastType.SUCCESS -> Color(0xFF10B981) to Icons.Default.CheckCircle
                     ToastType.ERROR -> Color(0xFFEF4444) to Icons.Default.Error
-                    ToastType.INFO -> Color(0xFF3B82F6) to Icons.Default.Info
+                    ToastType.INFO -> Color(0xFF14B8A6) to Icons.Default.Info
                 }
 
                 Row(

@@ -336,7 +336,7 @@ import com.siteflow.signature.shared.data.PayoutCalculationDto
                                     ) else Modifier
                                 )
                                 .background(
-                                    if (isCurrent) Color(0xFFEFF6FF) else Color(0xFFF9FAFB),
+                                    if (isCurrent) Color(0xFFF0FDFA) else Color(0xFFF9FAFB),
                                     RoundedCornerShape(10.dp)
                                 )
                                 .padding(12.dp),
@@ -481,7 +481,7 @@ import com.siteflow.signature.shared.data.PayoutCalculationDto
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = Color(0xFF1E40AF)
+                        color = Color(0xFF0F766E)
                     )
                     Text(
                         text = invoice.invoiceAmount,
@@ -489,7 +489,7 @@ import com.siteflow.signature.shared.data.PayoutCalculationDto
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         ),
-                        color = Color(0xFF1E40AF)
+                        color = Color(0xFF0F766E)
                     )
                 }
             }

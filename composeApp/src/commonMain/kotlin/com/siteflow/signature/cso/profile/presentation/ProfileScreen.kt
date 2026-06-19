@@ -367,7 +367,7 @@ private fun AseAsmProfileContent(
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column {
-                ProfileMenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, iconBgColor = Color(0xFFDBEAFE), iconTint = AppColors.BlueGradientStart, label = "Help & Support", onClick = onHelpSupport)
+                ProfileMenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, iconBgColor = Color(0xFFCCFBF1), iconTint = AppColors.BlueGradientStart, label = "Help & Support", onClick = onHelpSupport)
             }
         }
 
@@ -488,7 +488,7 @@ private fun OutletIdentityCard(profile: AseProfile, outlet: OutletProfile) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = null,
-                                tint = Color(0xFF3B82F6),
+                                tint = Color(0xFF14B8A6),
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
@@ -536,7 +536,7 @@ private fun OutletIdentityCard(profile: AseProfile, outlet: OutletProfile) {
                         .align(Alignment.BottomEnd)
                         .background(Color.White, CircleShape)
                         .padding(2.dp)
-                        .background(Color(0xFF3B82F6), CircleShape),
+                        .background(Color(0xFF14B8A6), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -576,7 +576,7 @@ private fun OutletPerformanceCard(performance: OutletPerformance) {
                 Text(
                     text = performance.lastUpdated,
                     style = AppTypography.Caption.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
-                    color = Color(0xFF3B82F6)
+                    color = Color(0xFF14B8A6)
                 )
             }
             
@@ -593,8 +593,8 @@ private fun OutletPerformanceCard(performance: OutletPerformance) {
                     label = "Invoice Submitted",
                     value = "₹${performance.invoiceSubmitted.toInt()}",
                     Modifier.weight(1f),
-                    bgColor = Color(0xFFEFF6FF),
-                    labelColor = Color(0xFF3B82F6)
+                    bgColor = Color(0xFFF0FDFA),
+                    labelColor = Color(0xFF14B8A6)
                 )
             }
             
@@ -623,19 +623,19 @@ private fun OutletPerformanceCard(performance: OutletPerformance) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .background(Color(0xFFEFF6FF), RoundedCornerShape(6.dp))
+                        .background(Color(0xFFF0FDFA), RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = Color(0xFF3B82F6),
+                        tint = Color(0xFF14B8A6),
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
                         text = "Eligible",
                         style = AppTypography.Caption.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
-                        color = Color(0xFF3B82F6)
+                        color = Color(0xFF14B8A6)
                     )
                 }
             }
@@ -740,7 +740,7 @@ private fun UpiPaymentCard(upiId: String, isVerified: Boolean) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(0xFFEFF6FF), RoundedCornerShape(10.dp)),
+                        .background(Color(0xFFF0FDFA), RoundedCornerShape(10.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -831,7 +831,7 @@ private fun BankPaymentCard(bank: BankDetails) {
                     if (!bank.accountType.isNullOrBlank()) {
                         Box(
                             modifier = Modifier
-                                .background(Color(0xFFEFF6FF), RoundedCornerShape(4.dp))
+                                .background(Color(0xFFF0FDFA), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
@@ -981,7 +981,7 @@ private fun ProfileHeader(profile: AseProfile, currentRole: UserRole?) {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = Color(0xFF3B82F6),
+                                    tint = Color(0xFF14B8A6),
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(

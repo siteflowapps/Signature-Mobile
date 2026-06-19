@@ -40,8 +40,8 @@ fun OutletPayoutCard(
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF1E40AF),
-                            Color(0xFF3B82F6)
+                            Color(0xFF0F766E),
+                            Color(0xFF14B8A6)
                         )
                     ),
                     RoundedCornerShape(18.dp)
@@ -115,7 +115,7 @@ fun OutletPayoutCard(
                         icon = Icons.Default.Description,
                         count = payout.totalInvoices,
                         label = "Total\nInvoices",
-                        tileColor = Color(0xFF3B82F6),
+                        tileColor = Color(0xFF14B8A6),
                         onClick = onTotalInvoicesClick,
                         modifier = Modifier.weight(1f)
                     )

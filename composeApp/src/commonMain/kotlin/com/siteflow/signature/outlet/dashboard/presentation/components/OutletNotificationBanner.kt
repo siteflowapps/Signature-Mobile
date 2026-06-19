@@ -30,7 +30,7 @@ fun OutletNotificationBanner(
         NotificationType.ERROR -> Triple(Color(0xFFFEE2E2), Color(0xFFDC2626), Color(0xFF991B1B))
         NotificationType.WARNING -> Triple(Color(0xFFFEF3C7), Color(0xFFF59E0B), Color(0xFF92400E))
         NotificationType.SUCCESS -> Triple(Color(0xFFD1FAE5), AppColors.Success, Color(0xFF065F46))
-        NotificationType.INFO -> Triple(Color(0xFFDBEAFE), AppColors.BlueGradientStart, Color(0xFF1E40AF))
+        NotificationType.INFO -> Triple(Color(0xFFCCFBF1), AppColors.BlueGradientStart, Color(0xFF0F766E))
     }
     val icon = when (notification.type) {
         NotificationType.ERROR -> Icons.Filled.Error

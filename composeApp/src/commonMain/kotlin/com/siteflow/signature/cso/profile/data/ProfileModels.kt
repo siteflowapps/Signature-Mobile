@@ -93,7 +93,7 @@ val mockAseProfile = AseProfile(
             trendPercent = 12,
             trend = KpiTrend.UP,
             icon = KpiIcon.OUTLETS,
-            iconBgColor = Color(0xFFDBEAFE),
+            iconBgColor = Color(0xFFCCFBF1),
             iconTintColor = AppColors.BlueGradientStart
         ),
         KpiCard(
@@ -143,7 +143,7 @@ val mockAsmProfile = AseProfile(
             trendPercent = 22,
             trend = KpiTrend.UP,
             icon = KpiIcon.OUTLETS,
-            iconBgColor = Color(0xFFDBEAFE),
+            iconBgColor = Color(0xFFCCFBF1),
             iconTintColor = AppColors.BlueGradientStart
         ),
         KpiCard(

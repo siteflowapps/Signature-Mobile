@@ -6,10 +6,10 @@ object AppColors {
     val TextPrimary = Color(0xFF1D1D1D)
     val TextSecondary = Color(0xFF6B7280)
 
-    val Primary = Color(0xFF2D7DFA)     // Signature Logo Blue
+    val Primary = Color(0xFF0D9488)     // Signature Logo Blue
     val Success = Color(0xFF1DBF73)     // Signature Success Green
     val Warning = Color(0xFFF59E0B)
-    val Info = Color(0xFF2D7DFA)
+    val Info = Color(0xFF0D9488)
     val Danger = Color(0xFFDC2626)
 
     val CardBackground = Color.White
@@ -17,9 +17,9 @@ object AppColors {
     val Divider = Color(0xFFE5E7EB)
 
     // Signature specific
-    val BlueGradientStart = Color(0xFF2471E7)
-    val BlueGradientEnd = Color(0xFF3B82F6)
-    val BackgroundGradientStart = Color(0xFFF0F4FF)
+    val BlueGradientStart = Color(0xFF0F766E)
+    val BlueGradientEnd = Color(0xFF14B8A6)
+    val BackgroundGradientStart = Color(0xFFF0FDFA)
     val BackgroundGradientEnd = Color(0xFFFFFFFF)
     val PillBackground = Color(0xFFF4F7FB)
     val TextTertiary = Color(0xFF7A869A)
@@ -27,14 +27,14 @@ object AppColors {
     val InputTextColor = Color(0xFF1F2937)     // dark grey (not black)
     val PlaceholderTextColor = Color(0xFF9CA3AF) // light grey
 
-    val blueEB = Color(0xFF2563EB)
-    val blueD8 = Color(0xFF1D4ED8)
-    val blueFE = Color(0xFFDBEAFE)
+    val blueEB = Color(0xFF0D9488)
+    val blueD8 = Color(0xFF0F766E)
+    val blueFE = Color(0xFFCCFBF1)
     val blueE5 = Color(0xFF4F46E5)
     val blueFF = Color(0xFFE0E7FF)
     val blue8A = Color(0xFF1E3A8A)
 
-    val lightBlueFF = Color(0xFFEFF6FF)
+    val lightBlueFF = Color(0xFFF0FDFA)
 
     val greyF6 = Color(0xFFF3F4F6)
     val grey63 = Color(0xFF4B5563)
@@ -68,15 +68,15 @@ object AppColors {
     val WalkthroughAccentPurpleLight = Color(0xFF6D28D9)
     val WalkthroughAccentPurpleSoft = Color(0xFFA855F7)
     val WalkthroughTextSubtle = Color(0xFF64748B)
-    val WalkthroughTextBlue = Color(0xFF2563EB)
-    val WalkthroughSurfaceCard = Color(0xFFEFF6FF)
+    val WalkthroughTextBlue = Color(0xFF0D9488)
+    val WalkthroughSurfaceCard = Color(0xFFF0FDFA)
     val WalkthroughSurfaceCardAlt = Color(0xFFE0E7FF)
 
     // ── Signature Stepper — step state colours ──
     val StepDone       = Color(0xFF16A34A)   // green-600
     val StepDoneBg     = Color(0xFFDCFCE7)   // green-100
-    val StepActive     = Color(0xFF2563EB)   // blue-600
-    val StepActiveBg   = Color(0xFFEFF6FF)   // blue-50
+    val StepActive     = Color(0xFF0D9488)   // blue-600
+    val StepActiveBg   = Color(0xFFF0FDFA)   // blue-50
     val StepPending    = Color(0xFF9CA3AF)   // gray-400
     val StepPendingBg  = Color(0xFFF3F4F6)   // gray-100
     val StepRejected   = Color(0xFFDC2626)   // red-600
@@ -86,8 +86,8 @@ object AppColors {
     // ── Asset request stage chip colours ──
     val AssetPending    = Color(0xFFF59E0B)  // amber — raised / L1 pending
     val AssetPendingBg  = Color(0xFFFEF3C7)
-    val AssetApproved   = Color(0xFF2563EB)  // blue  — L2 approved / in progress
-    val AssetApprovedBg = Color(0xFFDBEAFE)
+    val AssetApproved   = Color(0xFF0D9488)  // blue  — L2 approved / in progress
+    val AssetApprovedBg = Color(0xFFCCFBF1)
     val AssetExecuted   = Color(0xFF7C3AED)  // purple — installed, awaiting compliance
     val AssetExecutedBg = Color(0xFFF3E8FF)
     val AssetCompliant  = Color(0xFF16A34A)  // green — fully compliant
@@ -97,7 +97,7 @@ object AppColors {
 
     // ── Next-action card backgrounds ──
     val CtaAmberBg  = Color(0xFFFFFBEB)
-    val CtaBlueBg   = Color(0xFFEFF6FF)
+    val CtaBlueBg   = Color(0xFFF0FDFA)
     val CtaGreenBg  = Color(0xFFF0FDF4)
     val CtaRedBg    = Color(0xFFFFF1F2)
 

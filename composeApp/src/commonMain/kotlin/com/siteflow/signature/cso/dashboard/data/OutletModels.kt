@@ -57,10 +57,10 @@ enum class OutletStatus(
     DRAFT_PHOTOS("Agreement Next", Color(0xFFF59E0B), Color(0xFFFEF3C7), Color(0xFFF59E0B)),
     AGREEMENT_PENDING("Awaiting Approval", Color(0xFFF59E0B), Color(0xFFFEF3C7), Color(0xFFF59E0B)),
     ASE_PENDING("Pending L1 Review", Color(0xFFF59E0B), Color(0xFFFEF3C7), Color(0xFFF59E0B)),
-    ASE_APPROVED("L1 Approved", AppColors.BlueGradientStart, Color(0xFFDBEAFE), AppColors.BlueGradientStart),
+    ASE_APPROVED("L1 Approved", AppColors.BlueGradientStart, Color(0xFFCCFBF1), AppColors.BlueGradientStart),
     ASE_REJECTED("L1 Rejected", AppColors.Danger, Color(0xFFFEE2E2), AppColors.Danger),
     ASM_PENDING("Pending Review", Color(0xFFF59E0B), Color(0xFFFEF3C7), Color(0xFFF59E0B)),
-    ASM_APPROVED("ASM Approved", AppColors.BlueGradientStart, Color(0xFFDBEAFE), AppColors.BlueGradientStart),
+    ASM_APPROVED("ASM Approved", AppColors.BlueGradientStart, Color(0xFFCCFBF1), AppColors.BlueGradientStart),
     ASM_REJECTED("ASM Rejected", AppColors.Danger, Color(0xFFFEE2E2), AppColors.Danger),
     ONBOARDED("Onboarded", AppColors.Success, Color(0xFFD1FAE5), AppColors.Success);
 

@@ -54,7 +54,7 @@ fun InvoiceSourceCard(
     onClick: () -> Unit,
 ) {
     val accent = AppColors.BlueGradientStart
-    val containerColor = if (recommended) Color(0xFFEFF6FF) else Color.White
+    val containerColor = if (recommended) Color(0xFFF0FDFA) else Color.White
     val borderColor = if (recommended) accent.copy(alpha = 0.25f) else Color(0xFFE5E7EB)
     val iconBg = if (recommended) accent.copy(alpha = 0.15f) else Color(0xFFF3F4F6)
     val iconTint = if (recommended) accent else Color(0xFF6B7280)

@@ -103,8 +103,8 @@ android {
         applicationId = "com.siteflow.signature"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 21
-        versionName = "1.0.19"
+        versionCode = 1
+        versionName = "1.0.0"
     }
     packaging {
         resources {

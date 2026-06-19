@@ -249,117 +249,100 @@ fun MatchedItemCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // ── SKU Names ──
-            Text(
-                text = item.matchedSkuName ?: item.productName,
-                style = AppTypography.BodyPrimary.copy(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color(0xFF111827)
-            )
-
-            if (item.invoicedSkuName.isNotBlank() &&
-                item.invoicedSkuName != item.matchedSkuName
-            ) {
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text = "Invoice: ${item.invoicedSkuName}",
-                    style = AppTypography.Caption.copy(
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = AppColors.TextTertiary
-                )
-            }
-
-            Spacer(Modifier.height(14.dp))
-
-            // ── Row 1: Cases (hero, green) + Case Config ──
+            // ── Header: matched SKU name + match-% badge ──
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                verticalAlignment = Alignment.Top
             ) {
-                // Cases — hero metric, highlighted green
-                InfoCell(
-                    label = "Cases",
-                    value = "${item.finalQuantity} ${item.finalUnit}",
-                    isHighlighted = true,
-                    modifier = Modifier.weight(1f)
-                )
-                // Case Configuration
-                item.caseConfiguration?.let { config ->
-                    InfoCell(
-                        label = "Case Config",
-                        value = "$config units/case",
-                        modifier = Modifier.weight(1f)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.matchedSkuName ?: item.productName,
+                        style = AppTypography.BodyPrimary.copy(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color(0xFF111827)
+                    )
+                    if (item.invoicedSkuName.isNotBlank() &&
+                        item.invoicedSkuName != item.matchedSkuName
+                    ) {
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            text = "Invoiced: ${item.invoicedSkuName}",
+                            style = AppTypography.Caption.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = AppColors.TextTertiary,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Spacer(Modifier.width(10.dp))
+                ConfidenceBadge(item.confidence)
+            }
+
+            Spacer(Modifier.height(12.dp))
+            HorizontalDivider(color = Color(0xFFF3F4F6))
+            Spacer(Modifier.height(12.dp))
+
+            // ── Price-first footer: qty / rate (secondary) + amount (hero) ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Column {
+                    Text(
+                        text = "${item.finalQuantity} ${item.finalUnit}",
+                        style = AppTypography.BodyPrimary.copy(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Color(0xFF111827)
+                    )
+                    if (item.pricePerUnit > 0) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "₹${formatPrice(item.pricePerUnit)} / ${item.finalUnit.lowercase()}",
+                            style = AppTypography.Caption.copy(fontSize = 11.sp),
+                            color = AppColors.TextTertiary
+                        )
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Amount",
+                        style = AppTypography.Caption.copy(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.3.sp
+                        ),
+                        color = AppColors.TextTertiary
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        text = "₹${formatPrice(item.totalPrice)}",
+                        style = AppTypography.TitleLarge.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = AppColors.Primary
                     )
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            // ── Row 2: MRP/Case + MRP/Piece (reference data, not highlighted) ──
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item.mrpPerCase?.let { mrp ->
-                    InfoCell(
-                        label = "MRP / Case",
-                        value = "₹${formatPrice(mrp)}",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                item.mrpPerBottle?.let { mrp ->
-                    InfoCell(
-                        label = "MRP / Piece",
-                        value = "₹${formatPrice(mrp)}",
-                        modifier = Modifier.weight(1f)
-                    )
+            // ── MRP reference chips (shown only once the backend sends MRP) ──
+            if (item.mrpPerCase != null || item.mrpPerBottle != null || item.caseConfiguration != null) {
+                Spacer(Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item.mrpPerCase?.let { ConfigChip(text = "MRP/case ₹${formatPrice(it)}") }
+                    item.mrpPerBottle?.let { ConfigChip(text = "MRP/pc ₹${formatPrice(it)}") }
+                    item.caseConfiguration?.let { ConfigChip(text = "$it/case") }
                 }
             }
         }
-    }
-}
-
-/**
- * A single labeled info cell used in the 2-column grid.
- * Highlighted cells use green background to draw attention.
- */
-@Composable
-private fun InfoCell(
-    label: String,
-    value: String,
-    isHighlighted: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .background(
-                if (isHighlighted) Color(0xFFD1FAE5) else Color(0xFFF9FAFB),
-                RoundedCornerShape(10.dp)
-            )
-            .padding(10.dp)
-    ) {
-        Text(
-            text = label,
-            style = AppTypography.Caption.copy(
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 0.3.sp
-            ),
-            color = if (isHighlighted) Color(0xFF065F46) else AppColors.TextTertiary
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = value,
-            style = AppTypography.BodyPrimary.copy(
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            ),
-            color = if (isHighlighted) Color(0xFF065F46) else Color(0xFF111827)
-        )
     }
 }
 
@@ -476,8 +459,8 @@ fun ConfidenceBadge(confidence: Int, modifier: Modifier = Modifier) {
 fun ConfigChip(
     text: String,
     isPrimary: Boolean = false,
-    chipColor: Color = if (isPrimary) Color(0xFFDBEAFE) else Color(0xFFF3F4F6),
-    textColor: Color = if (isPrimary) Color(0xFF1E40AF) else Color(0xFF4B5563),
+    chipColor: Color = if (isPrimary) Color(0xFFCCFBF1) else Color(0xFFF3F4F6),
+    textColor: Color = if (isPrimary) Color(0xFF0F766E) else Color(0xFF4B5563),
     modifier: Modifier = Modifier
 ) {
     Text(

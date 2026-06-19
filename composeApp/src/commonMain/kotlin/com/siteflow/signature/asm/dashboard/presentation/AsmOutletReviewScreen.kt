@@ -337,7 +337,7 @@ private fun AsmDecisionContextBanner(
 ) {
     val (bgColor, borderColor, iconTint, title, subtitle) = when {
         isPendingReview -> ContextBannerData(
-            bgColor = Color(0xFFEFF6FF),
+            bgColor = Color(0xFFF0FDFA),
             borderColor = AppColors.BlueGradientStart.copy(alpha = 0.3f),
             iconTint = AppColors.BlueGradientStart,
             title = "Awaiting Your Approval",
@@ -586,7 +586,7 @@ private fun ComplianceReviewCard(
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .background(Color(0xFFEFF6FF), RoundedCornerShape(8.dp)),
+                            .background(Color(0xFFF0FDFA), RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

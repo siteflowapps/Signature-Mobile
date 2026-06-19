@@ -163,7 +163,7 @@ private fun PayoutInfoCard() {
                     .fillMaxWidth()
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(Color(0xFF1E40AF), Color(0xFF3B82F6))
+                            colors = listOf(Color(0xFF0F766E), Color(0xFF14B8A6))
                         ),
                         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                     )
@@ -182,8 +182,8 @@ private fun PayoutInfoCard() {
             Column(modifier = Modifier.padding(16.dp)) {
                 PayoutInfoRow(
                     icon = Icons.Default.TrendingUp,
-                    iconBg = Color(0xFFEFF6FF),
-                    iconTint = Color(0xFF2563EB),
+                    iconBg = Color(0xFFF0FDFA),
+                    iconTint = Color(0xFF0D9488),
                     title = "Volume-Based Slab",
                     subtitle = "Your payout tier is determined by your cumulative monthly case volume"
                 )

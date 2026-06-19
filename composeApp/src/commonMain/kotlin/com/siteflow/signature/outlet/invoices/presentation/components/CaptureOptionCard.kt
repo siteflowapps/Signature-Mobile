@@ -37,7 +37,7 @@ fun CaptureOptionCard(
             ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFFEFF6FF) else Color.White
+            containerColor = if (isSelected) Color(0xFFF0FDFA) else Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 0.dp else 2.dp)
     ) {

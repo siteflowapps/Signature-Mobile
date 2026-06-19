@@ -203,7 +203,7 @@ fun PayoutEstimateCard(
                 MonthlyStatPill(
                     label = "Rate / Case",
                     value = data.resolvedRatePerCase?.let { "₹${formatRate(it)}" } ?: "—",
-                    accent = Color(0xFF2563EB),
+                    accent = Color(0xFF0D9488),
                     modifier = Modifier.weight(1f)
                 )
                 if ((data.waterVolumePc ?: 0.0) > 0.0) {

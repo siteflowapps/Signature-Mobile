@@ -316,8 +316,8 @@ private fun AgreementSheetContent(
         // ═══════════════════════════════════════
         AgreementSectionCard(
             icon = Icons.Default.Storefront,
-            iconBg = Color(0xFFEFF6FF),
-            iconTint = Color(0xFF2563EB),
+            iconBg = Color(0xFFF0FDFA),
+            iconTint = Color(0xFF0D9488),
             title = "Outlet Information"
         ) {
             DetailRow("Outlet Name", state.outletName)
@@ -552,7 +552,7 @@ private fun OnboardingVolumeSlabTable() {
                 ) {
                     Text(tier, style = AppTypography.BodyPrimary.copy(fontSize = 13.sp), color = Color(0xFF374151), modifier = Modifier.weight(1f))
                     Text(volume, style = AppTypography.BodyPrimary.copy(fontSize = 13.sp), color = Color(0xFF374151), modifier = Modifier.weight(1.4f))
-                    Text(payout, style = AppTypography.BodyPrimary.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = Color(0xFF2563EB))
+                    Text(payout, style = AppTypography.BodyPrimary.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = Color(0xFF0D9488))
                 }
             }
         }
@@ -625,13 +625,13 @@ private fun PerformanceRewardsCard(onViewAgreement: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(0xFFEFF6FF), CircleShape),
+                        .background(Color(0xFFF0FDFA), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Handshake,
                         contentDescription = null,
-                        tint = Color(0xFF2563EB),
+                        tint = Color(0xFF0D9488),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -692,14 +692,14 @@ private fun PerformanceRewardsCard(onViewAgreement: () -> Unit) {
                 Icon(
                     imageVector = Icons.Default.Description,
                     contentDescription = null,
-                    tint = Color(0xFF2563EB),
+                    tint = Color(0xFF0D9488),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = "View Full Agreement",
                     style = AppTypography.BodyPrimary.copy(
-                        color = Color(0xFF2563EB),
+                        color = Color(0xFF0D9488),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
                     )
@@ -817,7 +817,7 @@ private fun DeclarationCard() {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
-                    tint = Color(0xFF2563EB),
+                    tint = Color(0xFF0D9488),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(8.dp))
@@ -827,7 +827,7 @@ private fun DeclarationCard() {
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     ),
-                    color = Color(0xFF1E40AF)
+                    color = Color(0xFF0F766E)
                 )
             }
 

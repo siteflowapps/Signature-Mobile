@@ -122,7 +122,7 @@ fun ErrorState(
             },
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (exhaustedRetries) Color(0xFF6B7280) else Color(0xFF3B82F6),
+                containerColor = if (exhaustedRetries) Color(0xFF6B7280) else Color(0xFF14B8A6),
                 contentColor = Color.White
             ),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)

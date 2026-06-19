@@ -115,7 +115,7 @@ fun DevRolePickerScreen(
                 title = "Customer Sales Officer (CSO)",
                 subtitle = "Onboard Outlets, Cooler/Branding, Compliance",
                 icon = Icons.Default.Person,
-                gradientColors = listOf(Color(0xFF2471E7), Color(0xFF3B82F6)),
+                gradientColors = listOf(Color(0xFF0F766E), Color(0xFF14B8A6)),
                 onClick = {
                     RoleManager.setRole(UserRole.CSO)
                     onRoleSelected(UserRole.CSO)

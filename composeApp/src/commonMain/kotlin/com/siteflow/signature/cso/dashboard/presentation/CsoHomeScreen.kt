@@ -191,7 +191,7 @@ private fun OverviewHeroCard(dashboard: DashboardData?) {
                 .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(Color(0xFF1E40AF), Color(0xFF3B82F6))
+                        colors = listOf(Color(0xFF0F766E), Color(0xFF14B8A6))
                     ),
                     RoundedCornerShape(18.dp)
                 )
@@ -354,8 +354,8 @@ private fun QuickStatsGrid(
                 value = "${dashboard?.totalOutlets ?: 0}",
                 label = "Total Outlets",
                 icon = Icons.Filled.Storefront,
-                iconBg = Color(0xFFEFF6FF),
-                iconTint = Color(0xFF2563EB),
+                iconBg = Color(0xFFF0FDFA),
+                iconTint = Color(0xFF0D9488),
                 onClick = onTotalOutlets,
                 modifier = Modifier.weight(1f)
             )
