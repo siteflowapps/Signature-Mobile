@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Receipt
@@ -31,7 +30,6 @@ import com.siteflow.signature.core.presentation.components.state.EndOfListIndica
 import com.siteflow.signature.core.presentation.components.state.LoadingMoreIndicator
 import com.siteflow.signature.core.presentation.components.state.InvoiceListSkeleton
 import com.siteflow.signature.core.presentation.components.state.ErrorState
-import com.siteflow.signature.core.presentation.components.animation.StaggeredAnimatedItem
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import kotlinx.coroutines.delay
@@ -158,13 +156,13 @@ fun InvoiceListScreen(
                         bottom = 80.dp
                     )
                 ) {
-                    itemsIndexed(state.filteredInvoices, key = { _, invoice -> invoice.id }) { index, invoice ->
-                        StaggeredAnimatedItem(index = index) {
-                            InvoiceCard(
-                                invoice = invoice,
-                                onClick = { onViewInvoiceDetails(invoice.id) }
-                            )
-                        }
+                    items(state.filteredInvoices, key = { invoice -> invoice.id }) { invoice ->
+                        // Not wrapped in StaggeredAnimatedItem: it starts each item invisible
+                        // (zero height) on entry, which breaks scroll restoration on back-navigation.
+                        InvoiceCard(
+                            invoice = invoice,
+                            onClick = { onViewInvoiceDetails(invoice.id) }
+                        )
                     }
 
                     // Loading more indicator — always present to keep item count stable
@@ -181,7 +179,7 @@ fun InvoiceListScreen(
                     // End of list indicator
                     item(key = "end_of_list") {
                         if (state.isLastPage && state.filteredInvoices.isNotEmpty() && !state.isLoading) {
-                            EndOfListIndicator(itemCount = state.totalElements)
+                            EndOfListIndicator(itemCount = state.filteredInvoices.size)
                         }
                     }
                 }

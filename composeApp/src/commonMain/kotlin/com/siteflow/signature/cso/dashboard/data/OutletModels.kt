@@ -250,7 +250,7 @@ data class OutletItem(
          * Factory: create from API DTO
          */
         fun fromDto(dto: com.siteflow.signature.cso.onboarding.data.dto.OutletResponseData): OutletItem {
-            val initials = dto.name.split(" ")
+            val initials = dto.name.orEmpty().split(" ")
                 .take(2)
                 .mapNotNull { it.firstOrNull()?.uppercase() }
                 .joinToString("")
@@ -258,7 +258,7 @@ data class OutletItem(
             val location = listOfNotNull(dto.locality, dto.city)
                 .filter { it.isNotBlank() }
                 .joinToString(", ")
-                .ifBlank { dto.address }
+                .ifBlank { dto.address ?: "" }
 
             val sortTime = dto.updatedAt ?: dto.createdAt ?: ""
             val timeAgo = if (sortTime.isNotBlank()) formatTimeAgo(sortTime) else ""
@@ -266,18 +266,18 @@ data class OutletItem(
 
             return OutletItem(
                 id = dto.id,
-                name = dto.name.toTitleCase(),
+                name = dto.name.orEmpty().toTitleCase(),
                 initials = initials.ifBlank { "?" },
                 slab = OutletSlab.SILVER,
                 location = location,
                 status = status,
                 updatedTime = timeAgo,
                 completedSteps = completedStepsFromStatus(status, AssetStatus.fromBackend(dto.assetStatus)),
-                ownerName = dto.ownerName,
-                contactNumber = dto.phone ?: dto.ownerMobile,
+                ownerName = dto.ownerName ?: "",
+                contactNumber = dto.phone ?: dto.ownerMobile ?: "",
                 whatsAppNumber = dto.ownerWhatsapp ?: "",
-                outletType = dto.outletType,
-                address = dto.address,
+                outletType = dto.outletType ?: "",
+                address = dto.address ?: "",
                 pincode = dto.pincode ?: "",
                 city = dto.city ?: "",
                 gpsLocation = if (dto.latitude != null && dto.longitude != null)

@@ -4,9 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -17,6 +16,8 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,7 +39,6 @@ import com.siteflow.signature.core.presentation.components.state.EndOfListIndica
 import com.siteflow.signature.core.presentation.components.state.LoadingMoreIndicator
 import com.siteflow.signature.core.presentation.components.state.OutletListSkeleton
 import com.siteflow.signature.core.presentation.components.state.ErrorState
-import com.siteflow.signature.core.presentation.components.animation.StaggeredAnimatedItem
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import org.koin.compose.koinInject
@@ -61,7 +61,7 @@ fun AsmDashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf(initialFilter ?: "All") }
+    var selectedFilter by remember { mutableStateOf(initialFilter ?: viewModel.state.value.savedFilter) }
 
     // Always refresh when this screen enters composition (fresh login, back navigation, etc.)
     LaunchedEffect(Unit) {
@@ -72,6 +72,47 @@ fun AsmDashboardScreen(
 
     val filteredOutlets = remember(state.outlets, searchQuery, selectedFilter) {
         viewModel.getFilteredOutlets(searchQuery, selectedFilter)
+    }
+
+    // LazyListState at top level so it is not recreated when the loading branch swaps in/out.
+    // Initialized from the ViewModel's saved position so that back-navigation restores the scroll.
+    val lazyListState = remember {
+        LazyListState(
+            firstVisibleItemIndex = viewModel.state.value.savedScrollIndex,
+            firstVisibleItemScrollOffset = viewModel.state.value.savedScrollOffset
+        )
+    }
+
+    // Infinite scroll: load next page when near bottom
+    LaunchedEffect(lazyListState) {
+        snapshotFlow {
+            val lastVisibleItem = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = lazyListState.layoutInfo.totalItemsCount
+            lastVisibleItem >= totalItems - 3 && totalItems > 0
+        }.distinctUntilChanged().collect { shouldLoad ->
+            if (shouldLoad) {
+                viewModel.onAction(AsmDashboardAction.LoadMore)
+            }
+        }
+    }
+
+    // Scroll restoration + tracking — runs each time lazyListState is (re)created, i.e. on every
+    // screen entry. Waits for the LazyColumn to be laid out before scrolling so the call is never
+    // lost to a race with the layout phase.
+    LaunchedEffect(lazyListState) {
+        val savedIndex = viewModel.state.value.savedScrollIndex
+        val savedOffset = viewModel.state.value.savedScrollOffset
+        if (savedIndex > 0 || savedOffset > 0) {
+            snapshotFlow { lazyListState.layoutInfo.totalItemsCount }
+                .first { it > 0 }
+            lazyListState.scrollToItem(savedIndex, savedOffset)
+        }
+        snapshotFlow { lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset }
+            .distinctUntilChanged()
+            .drop(1)
+            .collect { (index, offset) ->
+                viewModel.saveScrollPosition(index, offset)
+            }
     }
 
 
@@ -99,6 +140,7 @@ fun AsmDashboardScreen(
                     countForFilter = { filter -> viewModel.countForFilter(filter) },
                     onFilterSelected = { filter ->
                         selectedFilter = filter
+                        viewModel.saveFilter(filter)
                         viewModel.trackOutletFilterSelected(filter)
                     }
                 )
@@ -134,20 +176,6 @@ fun AsmDashboardScreen(
             )
         } else {
             val pullToRefreshState = rememberPullToRefreshState()
-            val lazyListState = rememberLazyListState()
-
-            // Infinite scroll: load next page when near bottom
-            LaunchedEffect(lazyListState) {
-                snapshotFlow {
-                    val lastVisibleItem = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    val totalItems = lazyListState.layoutInfo.totalItemsCount
-                    lastVisibleItem >= totalItems - 3 && totalItems > 0
-                }.distinctUntilChanged().collect { shouldLoad ->
-                    if (shouldLoad) {
-                        viewModel.onAction(AsmDashboardAction.LoadMore)
-                    }
-                }
-            }
 
             Box(
                 modifier = Modifier
@@ -168,17 +196,17 @@ fun AsmDashboardScreen(
                         bottom = 80.dp
                     )
                 ) {
-                    itemsIndexed(filteredOutlets, key = { _, outlet -> outlet.id }) { index, outlet ->
-                        StaggeredAnimatedItem(index = index) {
-                            AsmOutletCard(
-                                outlet = outlet,
-                                onReview = {
-                                    viewModel.trackOutletReviewViewed(outlet.id, outlet.status.label, outlet.onboardedByAse)
-                                    onReviewOutlet(outlet)
-                                },
-                                onViewDetails = { onViewDetails(outlet) }
-                            )
-                        }
+                    items(filteredOutlets, key = { outlet -> outlet.id }) { outlet ->
+                        // Not wrapped in StaggeredAnimatedItem: it starts each item invisible
+                        // (zero height) on entry, which breaks scroll restoration on back-navigation.
+                        AsmOutletCard(
+                            outlet = outlet,
+                            onReview = {
+                                viewModel.trackOutletReviewViewed(outlet.id, outlet.status.label, outlet.onboardedByAse)
+                                onReviewOutlet(outlet)
+                            },
+                            onViewDetails = { onViewDetails(outlet) }
+                        )
                     }
 
                     // Loading more indicator — always present to keep item count stable
@@ -195,7 +223,7 @@ fun AsmDashboardScreen(
                     // End of list indicator
                     item(key = "end_of_list") {
                         if (state.isLastPage && filteredOutlets.isNotEmpty() && !state.isLoading) {
-                            EndOfListIndicator(itemCount = state.totalElements)
+                            EndOfListIndicator(itemCount = filteredOutlets.size)
                         }
                     }
                 }

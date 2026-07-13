@@ -3,9 +3,8 @@ package com.siteflow.signature.cso.dashboard.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Storefront
@@ -29,8 +28,8 @@ import com.siteflow.signature.core.presentation.components.state.EndOfListIndica
 import com.siteflow.signature.core.presentation.components.state.LoadingMoreIndicator
 import com.siteflow.signature.core.presentation.components.state.OutletListSkeleton
 import com.siteflow.signature.core.presentation.components.state.ErrorState
-import com.siteflow.signature.core.presentation.components.animation.StaggeredAnimatedItem
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import org.koin.compose.koinInject
 
 
@@ -64,13 +63,22 @@ fun CsoDashboardScreen(
     }
 
     var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf(initialFilter ?: "All") }
+    var selectedFilter by remember { mutableStateOf(initialFilter ?: viewModel.state.value.savedFilter) }
 
     val filters = listOf("All", "Draft", "Pending", "Submitted", "Verified", "Rejected")
 
     // Filter outlets based on search + filter chip
     val filteredOutlets = remember(searchQuery, selectedFilter, dashboardState.outlets) {
         viewModel.getFilteredOutlets(searchQuery, selectedFilter)
+    }
+
+    // LazyListState at top level so it is not recreated when the loading branch swaps in/out.
+    // Initialized from the ViewModel's saved position so that back-navigation restores the scroll.
+    val lazyListState = remember {
+        LazyListState(
+            firstVisibleItemIndex = viewModel.state.value.savedScrollIndex,
+            firstVisibleItemScrollOffset = viewModel.state.value.savedScrollOffset
+        )
     }
 
     // Debounced search tracking — fires 600ms after user stops typing
@@ -106,6 +114,7 @@ fun CsoDashboardScreen(
                     countForFilter = { filter -> viewModel.countForFilter(filter) },
                     onFilterSelected = { filter ->
                         selectedFilter = filter
+                        viewModel.saveFilter(filter)
                         viewModel.trackOutletFilterSelected(filter)
                     }
                 )
@@ -140,7 +149,6 @@ fun CsoDashboardScreen(
             )
         } else {
             val pullToRefreshState = rememberPullToRefreshState()
-            val lazyListState = rememberLazyListState()
 
             // Infinite scroll: load next page when near bottom
             LaunchedEffect(lazyListState) {
@@ -155,12 +163,24 @@ fun CsoDashboardScreen(
                 }
             }
 
-            // Scroll tracking — fires once per distinct scroll position change
+            // Scroll restoration + tracking — runs each time lazyListState is (re)created, i.e. on every
+            // screen entry. Waits for the LazyColumn to be laid out before scrolling so the call is never
+            // lost to a race with the layout phase.
             LaunchedEffect(lazyListState) {
-                snapshotFlow { lazyListState.firstVisibleItemIndex }
+                val savedIndex = viewModel.state.value.savedScrollIndex
+                val savedOffset = viewModel.state.value.savedScrollOffset
+                if (savedIndex > 0 || savedOffset > 0) {
+                    snapshotFlow { lazyListState.layoutInfo.totalItemsCount }
+                        .first { it > 0 }
+                    lazyListState.scrollToItem(savedIndex, savedOffset)
+                }
+                snapshotFlow { lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset }
                     .distinctUntilChanged()
                     .drop(1)
-                    .collect { viewModel.trackOutletListScrolled() }
+                    .collect { (index, offset) ->
+                        viewModel.saveScrollPosition(index, offset)
+                        viewModel.trackOutletListScrolled()
+                    }
             }
 
             Box(
@@ -182,22 +202,22 @@ fun CsoDashboardScreen(
                         bottom = 80.dp
                     )
                 ) {
-                    itemsIndexed(filteredOutlets, key = { _, outlet -> outlet.id }) { index, outlet ->
-                        StaggeredAnimatedItem(index = index) {
-                            OutletCard(
-                                outlet = outlet,
-                                onContinue = {
-                                    if (outlet.isContinuingOnboarding) {
-                                        viewModel.trackOutletCardTapped(outlet.id, outlet.status.label, "continue")
-                                        onContinueOnboarding(outlet.id, outlet.onboardingStep)
-                                    }
-                                },
-                                onViewDetails = {
-                                    viewModel.trackOutletCardTapped(outlet.id, outlet.status.label, "view")
-                                    onViewDetails(outlet)
+                    items(filteredOutlets, key = { outlet -> outlet.id }) { outlet ->
+                        // Not wrapped in StaggeredAnimatedItem: it starts each item invisible
+                        // (zero height) on entry, which breaks scroll restoration on back-navigation.
+                        OutletCard(
+                            outlet = outlet,
+                            onContinue = {
+                                if (outlet.isContinuingOnboarding) {
+                                    viewModel.trackOutletCardTapped(outlet.id, outlet.status.label, "continue")
+                                    onContinueOnboarding(outlet.id, outlet.onboardingStep)
                                 }
-                            )
-                        }
+                            },
+                            onViewDetails = {
+                                viewModel.trackOutletCardTapped(outlet.id, outlet.status.label, "view")
+                                onViewDetails(outlet)
+                            }
+                        )
                     }
 
                     // Loading more indicator — always present to keep item count stable
@@ -214,7 +234,7 @@ fun CsoDashboardScreen(
                     // End of list indicator
                     item(key = "end_of_list") {
                         if (dashboardState.isLastPage && filteredOutlets.isNotEmpty() && !dashboardState.isLoading) {
-                            EndOfListIndicator(itemCount = dashboardState.totalElements)
+                            EndOfListIndicator(itemCount = filteredOutlets.size)
                         }
                     }
                 }
