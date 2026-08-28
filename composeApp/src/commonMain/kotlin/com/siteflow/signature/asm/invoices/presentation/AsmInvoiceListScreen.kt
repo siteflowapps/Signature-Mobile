@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -34,7 +33,6 @@ import com.siteflow.signature.core.presentation.components.state.EndOfListIndica
 import com.siteflow.signature.core.presentation.components.state.LoadingMoreIndicator
 import com.siteflow.signature.core.presentation.components.state.InvoiceListSkeleton
 import com.siteflow.signature.core.presentation.components.state.ErrorState
-import com.siteflow.signature.core.presentation.components.animation.StaggeredAnimatedItem
 import com.siteflow.signature.core.presentation.design.AppColors
 import com.siteflow.signature.core.presentation.design.AppTypography
 import kotlinx.coroutines.delay
@@ -58,7 +56,7 @@ fun AsmInvoiceListScreen(
 
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf(initialFilter ?: "Pending L2 Review") }
+    var selectedFilter by remember { mutableStateOf(initialFilter ?: viewModel.state.value.savedFilter) }
     var isRefreshing by remember { mutableStateOf(false) }
 
     val filters = listOf("All", "Pending L2 Review", "Approved", "Rejected")
@@ -114,7 +112,10 @@ fun AsmInvoiceListScreen(
                         else                -> state.totalElements
                     }
                 },
-                onFilterSelected = { selectedFilter = it }
+                onFilterSelected = {
+                    selectedFilter = it
+                    viewModel.saveFilter(it)
+                }
             )
 
             Spacer(Modifier.height(12.dp))
@@ -176,13 +177,13 @@ fun AsmInvoiceListScreen(
                         bottom = 80.dp
                     )
                 ) {
-                    itemsIndexed(filteredInvoices, key = { _, invoice -> invoice.id }) { index, invoice ->
-                        StaggeredAnimatedItem(index = index) {
-                            AsmInvoiceCard(
-                                invoice = invoice,
-                                onClick = { onViewInvoiceDetails(invoice.id) }
-                            )
-                        }
+                    items(filteredInvoices, key = { invoice -> invoice.id }) { invoice ->
+                        // Not wrapped in StaggeredAnimatedItem: it starts each item invisible
+                        // (zero height) on entry, which breaks scroll restoration on back-navigation.
+                        AsmInvoiceCard(
+                            invoice = invoice,
+                            onClick = { onViewInvoiceDetails(invoice.id) }
+                        )
                     }
 
                     // Loading more indicator — always present to keep item count stable
@@ -199,7 +200,7 @@ fun AsmInvoiceListScreen(
                     // End of list indicator
                     item(key = "end_of_list") {
                         if (state.isLastPage && filteredInvoices.isNotEmpty() && !state.isLoading) {
-                            EndOfListIndicator(itemCount = state.totalElements)
+                            EndOfListIndicator(itemCount = filteredInvoices.size)
                         }
                     }
                 }

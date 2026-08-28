@@ -435,7 +435,7 @@ class OnboardingViewModel(
                     scope.launch {
                         outletRepository.getOutletById(action.outletId)
                             .onSuccess { outlet ->
-                                updateState { it.copy(contactNumber = outlet.phone ?: outlet.ownerMobile) }
+                                updateState { it.copy(contactNumber = outlet.phone ?: outlet.ownerMobile ?: "") }
                             }
                     }
                 }

@@ -38,7 +38,8 @@ data class AsmInvoiceState(
     val currentPage: Int = 0,
     val totalPages: Int = 0,
     val totalElements: Int = 0,
-    val isLastPage: Boolean = true
+    val isLastPage: Boolean = true,
+    val savedFilter: String = "Pending L2 Review"
 )
 
 sealed interface AsmInvoiceEvent {
@@ -132,6 +133,10 @@ class AsmInvoiceViewModel(
                     updateState { it.copy(isLoadingMore = false) }
                 }
         }
+    }
+
+    fun saveFilter(filter: String) {
+        updateState { it.copy(savedFilter = filter) }
     }
 
     private fun loadInvoiceDetail(invoiceId: String) {

@@ -22,7 +22,10 @@ data class CsoDashboardState(
     val currentPage: Int = 0,
     val totalPages: Int = 0,
     val totalElements: Int = 0,
-    val isLastPage: Boolean = true
+    val isLastPage: Boolean = true,
+    val savedScrollIndex: Int = 0,
+    val savedScrollOffset: Int = 0,
+    val savedFilter: String = "All"
 )
 
 class CsoDashboardViewModel(
@@ -147,6 +150,14 @@ class CsoDashboardViewModel(
             }
             matchesSearch && matchesFilter
         }
+    }
+
+    fun saveScrollPosition(index: Int, offset: Int) {
+        _state.update { it.copy(savedScrollIndex = index, savedScrollOffset = offset) }
+    }
+
+    fun saveFilter(filter: String) {
+        _state.update { it.copy(savedFilter = filter) }
     }
 
     fun trackOutletFilterSelected(filter: String) {

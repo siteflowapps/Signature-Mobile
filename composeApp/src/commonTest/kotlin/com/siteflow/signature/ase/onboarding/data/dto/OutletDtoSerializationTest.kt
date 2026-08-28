@@ -237,6 +237,46 @@ class OutletDtoSerializationTest {
     }
 
     @Test
+    fun `OutletListResponseDto - row with null address and other string fields`() {
+        // Regression: backend can return null for address/name/ownerName/ownerMobile/outletType
+        // on draft rows. These must decode to null rather than crashing.
+        val raw = """
+        {
+            "success": true,
+            "data": {
+                "content": [
+                    {
+                        "id": "a757535f-d461-4858-ab66-a252e89a6e2b",
+                        "channelType": "GROCERY",
+                        "address": null,
+                        "landmark": null,
+                        "locality": null,
+                        "outletStatus": "DRAFT_BASIC",
+                        "photos": []
+                    }
+                ],
+                "page": 0,
+                "size": 20,
+                "totalElements": 1,
+                "totalPages": 1,
+                "last": true
+            },
+            "timestamp": "2026-03-03T12:43:56.809127084Z"
+        }
+        """.trimIndent()
+
+        val result = json.decodeFromString<OutletListResponseDto>(raw)
+        assertTrue(result.success)
+        assertNotNull(result.data)
+        val outlet = result.data!!.content[0]
+        assertEquals("a757535f-d461-4858-ab66-a252e89a6e2b", outlet.id)
+        assertNull(outlet.address)
+        assertNull(outlet.name)
+        assertNull(outlet.outletType)
+        assertEquals("DRAFT_BASIC", outlet.outletStatus)
+    }
+
+    @Test
     fun `OutletListResponseDto - auth error`() {
         val raw = """
         {
